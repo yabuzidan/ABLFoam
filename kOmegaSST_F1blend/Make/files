@@ -1,0 +1,11 @@
+myderivedFvPatchFields/mainABL/mainABL.C
+myderivedFvPatchFields/OmegaABL/OmegaABL.C
+myderivedFvPatchFields/kABL/kABL.C
+myderivedFvPatchFields/VelocityABL/VelocityABL.C
+myderivedFvPatchFields/nutRoughABL/nutRoughABLWallFunctionFvPatchScalarField.C
+myderivedFvPatchFields/omegaRoughABL/omegaRoughABLWallFunctionFvPatchScalarField.C
+
+
+mainInclude.C
+LIB = $(FOAM_USER_LIBBIN)/myLibABLkOmegaSST_diffblend
+
