@@ -25,7 +25,7 @@ License
 
 #include "epsilonRoughABLFvPatchScalarField.H"
 #include "nutWallFunctionFvPatchScalarField.H"
-#include "turbulenceModel.H"
+#include "momentumTransportModel.H"
 #include "fvMatrix.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvc.H"
@@ -153,7 +153,7 @@ Foam::epsilonRoughABLFvPatchScalarField::epsilonPatch(const label patchi)
 
 void Foam::epsilonRoughABLFvPatchScalarField::calculateTurbulenceFields
 (
-    const turbulenceModel& turbulence,
+    const momentumTransportModel& turbulence,
     scalarField& G0,
     scalarField& epsilon0
 )
@@ -186,7 +186,7 @@ void Foam::epsilonRoughABLFvPatchScalarField::calculateTurbulenceFields
 
 void Foam::epsilonRoughABLFvPatchScalarField::calculate
 (
-    const turbulenceModel& turbModel,
+    const momentumTransportModel& turbModel,
     const List<scalar>& cornerWeights,
     const fvPatch& patch,
     scalarField& G0,
@@ -627,11 +627,11 @@ void Foam::epsilonRoughABLFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const momentumTransportModel& turbModel = db().lookupObject<momentumTransportModel>
     (
         IOobject::groupName
         (
-            turbulenceModel::propertiesName,
+            momentumTransportModel::typeName,
             internalField().group()
         )
     );
@@ -679,11 +679,11 @@ void Foam::epsilonRoughABLFvPatchScalarField::updateWeightedCoeffs
         return;
     }
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const momentumTransportModel& turbModel = db().lookupObject<momentumTransportModel>
     (
         IOobject::groupName
         (
-            turbulenceModel::propertiesName,
+            momentumTransportModel::typeName,
             internalField().group()
         )
     );

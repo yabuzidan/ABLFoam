@@ -83,10 +83,10 @@ namespace RASModels
                            Class kEpsilonABL Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class BasicTurbulenceModel>
+template<class BasicMomentumTransportModel>
 class kEpsilonABL
 :
-    public eddyViscosity<RASModel<BasicTurbulenceModel>>
+    public eddyViscosity<RASModel<BasicMomentumTransportModel>>
 {
 protected:
 
@@ -186,9 +186,9 @@ protected:
 
 public:
 
-    typedef typename BasicTurbulenceModel::alphaField alphaField;
-    typedef typename BasicTurbulenceModel::rhoField rhoField;
-    typedef typename BasicTurbulenceModel::transportModel transportModel;
+    typedef typename BasicMomentumTransportModel::alphaField alphaField;
+    typedef typename BasicMomentumTransportModel::rhoField rhoField;
+    typedef typename BasicMomentumTransportModel::transportModel transportModel;
 
 
     //- Runtime type information
@@ -206,7 +206,7 @@ public:
             const surfaceScalarField& alphaRhoPhi,
             const surfaceScalarField& phi,
             const transportModel& transport,
-            const word& propertiesName = turbulenceModel::propertiesName,
+            // const word& propertiesName = momentumTransportModel::typeName,
             const word& type = typeName
         );
 

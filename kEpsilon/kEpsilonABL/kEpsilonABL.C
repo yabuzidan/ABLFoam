@@ -36,18 +36,17 @@ namespace RASModels
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-template<class BasicTurbulenceModel>
-void kEpsilonABL<BasicTurbulenceModel>::correctNut()
+template<class BasicMomentumTransportModel>
+void kEpsilonABL<BasicMomentumTransportModel>::correctNut()
 {
     this->nut_ = blendCmu_*sqr(k_)/epsilon_;
     this->nut_.correctBoundaryConditions();
     fv::options::New(this->mesh_).correct(this->nut_);
 
-    BasicTurbulenceModel::correctNut();
 }
     
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::ABLepsilonSource()
+template<class BasicMomentumTransportModel>
+tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::ABLepsilonSource()
 {
     bool debug=0;
     if (debug)
@@ -56,8 +55,8 @@ tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::ABLepsilonSource()
     return eterm1_ - eterm2_;
 }
     
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::ABLkSource()
+template<class BasicMomentumTransportModel>
+tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::ABLkSource()
 {
     bool debug=0;
     if (debug)
@@ -66,8 +65,8 @@ tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::ABLkSource()
     return -(kterm1_ + wSwitch_*kterm2_);
 }
 
-template<class BasicTurbulenceModel>
-void kEpsilonABL<BasicTurbulenceModel>::referencesComputation()
+template<class BasicMomentumTransportModel>
+void kEpsilonABL<BasicMomentumTransportModel>::referencesComputation()
 {
     bool debug=0;
     if (debug)
@@ -167,8 +166,8 @@ void kEpsilonABL<BasicTurbulenceModel>::referencesComputation()
     
 }
    
-template<class BasicTurbulenceModel>
-void kEpsilonABL<BasicTurbulenceModel>::errorsAndCmuComputation()
+template<class BasicMomentumTransportModel>
+void kEpsilonABL<BasicMomentumTransportModel>::errorsAndCmuComputation()
 {
     bool debug=0;
     if (debug)
@@ -184,8 +183,8 @@ void kEpsilonABL<BasicTurbulenceModel>::errorsAndCmuComputation()
 
 }
 
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::uError()
+template<class BasicMomentumTransportModel>
+tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::uError()
 {
     bool debug=0;
     if (debug)
@@ -205,8 +204,8 @@ tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::uError()
     return min(Udiff,scalar(1));
 }
  
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::kError()
+template<class BasicMomentumTransportModel>
+tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::kError()
 {
     bool debug=0;
     if (debug)
@@ -225,8 +224,8 @@ tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::kError()
     return min(Kdiff,scalar(1));
 }
     
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::eError()
+template<class BasicMomentumTransportModel>
+tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::eError()
 {
     bool debug=0;
     if (debug)
@@ -246,8 +245,8 @@ tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::eError()
     return min(Ediff,scalar(1));
 }
     
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::hybridError()
+template<class BasicMomentumTransportModel>
+tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::hybridError()
 {
     bool debug=0;
     if (debug)
@@ -256,8 +255,8 @@ tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::hybridError()
     return max(max(Uerr_,Kerr_),Eerr_);
 }
     
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::blendingFunction()
+template<class BasicMomentumTransportModel>
+tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::blendingFunction()
 {
     bool debug=0;
     if (debug)
@@ -272,8 +271,8 @@ tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::blendingFunction()
 }
     
 /* Non-linear Eddy-viscosity model Cmu */
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::nonlinearCmu()
+template<class BasicMomentumTransportModel>
+tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::nonlinearCmu()
 {
     bool debug=0;
     if (debug)
@@ -288,8 +287,8 @@ tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::nonlinearCmu()
 }
     
 // Height dependent blended Cmu
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::blendedCmu()
+template<class BasicMomentumTransportModel>
+tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::blendedCmu()
 {
     bool debug=0;
     if (debug)
@@ -300,8 +299,8 @@ tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::blendedCmu()
 }
     
 // Smooth Cmu
-template<class BasicTurbulenceModel>
-tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::homogeneousCmu()
+template<class BasicMomentumTransportModel>
+tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::homogeneousCmu()
 {
     bool debug=0;
     if (debug)
@@ -311,8 +310,8 @@ tmp<volScalarField> kEpsilonABL<BasicTurbulenceModel>::homogeneousCmu()
 }
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class BasicTurbulenceModel>
-kEpsilonABL<BasicTurbulenceModel>::kEpsilonABL
+template<class BasicMomentumTransportModel>
+kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
 (
     const alphaField& alpha,
     const rhoField& rho,
@@ -320,11 +319,10 @@ kEpsilonABL<BasicTurbulenceModel>::kEpsilonABL
     const surfaceScalarField& alphaRhoPhi,
     const surfaceScalarField& phi,
     const transportModel& transport,
-    const word& propertiesName,
     const word& type
 )
 :
-    eddyViscosity<RASModel<BasicTurbulenceModel>>
+    eddyViscosity<RASModel<BasicMomentumTransportModel>>
     (
         type,
         alpha,
@@ -332,8 +330,7 @@ kEpsilonABL<BasicTurbulenceModel>::kEpsilonABL
         U,
         alphaRhoPhi,
         phi,
-        transport,
-        propertiesName
+        transport
     ),
 
     Cmu_
@@ -936,10 +933,10 @@ kEpsilonABL<BasicTurbulenceModel>::kEpsilonABL
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
     
-template<class BasicTurbulenceModel>
-bool kEpsilonABL<BasicTurbulenceModel>::read()
+template<class BasicMomentumTransportModel>
+bool kEpsilonABL<BasicMomentumTransportModel>::read()
 {
-    if (eddyViscosity<RASModel<BasicTurbulenceModel>>::read())
+    if (eddyViscosity<RASModel<BasicMomentumTransportModel>>::read())
     {
         Cmu_.readIfPresent(this->coeffDict());
         C1_.readIfPresent(this->coeffDict());
@@ -980,8 +977,8 @@ bool kEpsilonABL<BasicTurbulenceModel>::read()
 }
 
 
-template<class BasicTurbulenceModel>
-void kEpsilonABL<BasicTurbulenceModel>::correct()
+template<class BasicMomentumTransportModel>
+void kEpsilonABL<BasicMomentumTransportModel>::correct()
 {
     if (!this->turbulence_)
     {
@@ -997,7 +994,7 @@ void kEpsilonABL<BasicTurbulenceModel>::correct()
     volScalarField& nut = this->nut_;
     fv::options& fvOptions(fv::options::New(this->mesh_));
 
-    eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
+    eddyViscosity<RASModel<BasicMomentumTransportModel>>::correct();
     
     if (this->mesh_.changing())
     {
