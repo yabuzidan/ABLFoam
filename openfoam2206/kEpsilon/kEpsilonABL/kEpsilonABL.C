@@ -989,13 +989,13 @@ void kEpsilonABL<BasicTurbulenceModel>::correct()
     }
 
     // Local references
-    // const alphaField& alpha = this->alpha_;
-    // const rhoField& rho = this->rho_;
-    // const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
+    const alphaField& alpha = this->alpha_;
+    const rhoField& rho = this->rho_;
+    const surfaceScalarField& alphaRhoPhi = this->alphaRhoPhi_;
     const surfaceScalarField& phi = this->phi_;
     const volVectorField& U = this->U_;
     volScalarField& nut = this->nut_;
-    // fv::options& fvOptions(fv::options::New(this->mesh_));
+    fv::options& fvOptions(fv::options::New(this->mesh_));
 
     eddyViscosity<RASModel<BasicTurbulenceModel>>::correct();
     

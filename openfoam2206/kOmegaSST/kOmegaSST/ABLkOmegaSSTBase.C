@@ -23,120 +23,71 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kEpsilonABL.H"
+#include "ABLkOmegaSSTBase.H"
 #include "fvOptions.H"
 #include "bound.H"
+#include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace RASModels
-{
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
-template<class BasicMomentumTransportModel>
-void kEpsilonABL<BasicMomentumTransportModel>::correctNut()
-{
-    this->nut_ = blendCmu_*sqr(k_)/epsilon_;
-    this->nut_.correctBoundaryConditions();
-    fv::options::New(this->mesh_).correct(this->nut_);
 
-}
-    
-template<class BasicMomentumTransportModel>
-tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::ABLepsilonSource()
+template<class TurbulenceModel, class BasicTurbulenceModel>
+void ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::referencesComputation()
 {
-    bool debug=0;
-    if (debug)
-        Info << "Entered to ABLepsilonSource" << endl;
-    
-    return eterm1_ - eterm2_;
-}
-    
-template<class BasicMomentumTransportModel>
-tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::ABLkSource()
-{
-    bool debug=0;
-    if (debug)
-        Info << "Entered to ABLkSource" << endl;
-
-    return -(kterm1_ + wSwitch_*kterm2_);
-}
-
-template<class BasicMomentumTransportModel>
-void kEpsilonABL<BasicMomentumTransportModel>::referencesComputation()
-{
-    bool debug=0;
+    bool debug=1;
     if (debug)
         Info << "Entered to referencesComputation" << endl;
     
     // Set reference values for internal fields
     volScalarField coord = (centres_ + z0_)/z0_;
     volScalarField coord2 = (centres_ + z0_);
+    dimensionSet coord2d(coord2.dimensions());
     coord2.dimensions().reset(dimless);
     
     uref_ = ustar_*log(coord)/kappa_;
     kref_ = A_*log(coord) + B_*sqr(coord) + C_*coord + D_ + E_*log(coord2);
     
-    homCmu_ = homogeneousCmu();
+    coord2.dimensions().reset(coord2d);
+    oref_ = (1/(kappa_*ustar_*coord2))*kref_;
     
-    eref_ = sqrt(homCmu_)*kref_*ustar_/(kappa_*(centres_+z0_));
-    nref_ = homCmu_*sqr(kref_)/eref_;
-    
-    Gref_   = pow(ustar_,3)/(kappa_*(centres_+z0_));
-    eterm1_ = (pow(ustar_,4)/pow((centres_+z0_),2))*((C2_-C1_)*sqrt(homCmu_)/pow(kappa_,2));
-    eterm2_ = (pow(ustar_,4)/pow((centres_+z0_),2))*(1/sigmaEps_);
-    //eterm1_ = (pow(ustar_,4)/sigmaEps_)*(1/pow((centres_+z0_),2));
-    //eterm2_ = C1_*Gref_*eref_/kref_ - C2_*eref_*eref_/kref_;
-    kterm1_ = (ustar_*kappa_/(z0_*sigmak_))*(4*B_*(centres_+z0_)/z0_ + C_);
-    kterm2_ = Gref_ - eref_;
-    
-    volScalarField mynu = this->nu();
+    hombetaStar_ = homogeneousbetaStar();
 
-    // Boundary fields
+// Boundary fields
     const fvPatchList& patches = this->mesh_.boundary();
     volScalarField::Boundary& centresBf_ = this->centres_.boundaryFieldRef();
     volScalarField::Boundary& krefBf_ = this->kref_.boundaryFieldRef();
+    volScalarField::Boundary& orefBf_ = this->oref_.boundaryFieldRef();
     volScalarField::Boundary& urefBf_ = this->uref_.boundaryFieldRef();
-    volScalarField::Boundary& homCmuBf_ = this->homCmu_.boundaryFieldRef();
-    volScalarField::Boundary& erefBf_ = this->eref_.boundaryFieldRef();
-    volScalarField::Boundary& nrefBf_ = this->nref_.boundaryFieldRef();
-    volScalarField::Boundary& GrefBf_ = this->Gref_.boundaryFieldRef();
-    volScalarField::Boundary& eterm1Bf_ = this->eterm1_.boundaryFieldRef();
-    volScalarField::Boundary& eterm2Bf_ = this->eterm2_.boundaryFieldRef();
-    volScalarField::Boundary& kterm1Bf_ = this->kterm1_.boundaryFieldRef();
-    volScalarField::Boundary& kterm2Bf_ = this->kterm2_.boundaryFieldRef();
-    
+    volScalarField::Boundary& hombetaStarBf_ = this->hombetaStar_.boundaryFieldRef();
 
-    scalar coordt=0;
-    scalar coord2t=0;
+
+	scalar coordt=0;
+    	scalar coord2t=0;
     
     forAll(patches, patchi)
     {
         fvPatchScalarField& pcentres_  = centresBf_[patchi];
         fvPatchScalarField& pkref_  = krefBf_[patchi];
         fvPatchScalarField& puref_  = urefBf_[patchi];
-        fvPatchScalarField& phomCmu_  = homCmuBf_[patchi];
-        fvPatchScalarField& peref_  = erefBf_[patchi];
-        fvPatchScalarField& pnref_  = nrefBf_[patchi];
-        fvPatchScalarField& pGref_  = GrefBf_[patchi];
-        fvPatchScalarField& peterm1_  = eterm1Bf_[patchi];
-        fvPatchScalarField& peterm2_  = eterm2Bf_[patchi];
-        fvPatchScalarField& pkterm1_  = kterm1Bf_[patchi];
-        fvPatchScalarField& pkterm2_  = kterm2Bf_[patchi];
+        fvPatchScalarField& phombetaStar_  = hombetaStarBf_[patchi];
+        fvPatchScalarField& poref_  = orefBf_[patchi];
+
 
         const fvPatch& curPatch = patches[patchi];
         
-        if (isType<wallFvPatch>(curPatch))
+        /*if (isType<wallFvPatch>(curPatch))
         {
             forAll(curPatch, facei)
             {
                 label faceCelli = curPatch.faceCells()[facei];
                 wSwitch_[faceCelli] = 0.0;
             }
-        }
+        }*/
         
         forAll(curPatch, facei)
         {
@@ -146,47 +97,33 @@ void kEpsilonABL<BasicMomentumTransportModel>::referencesComputation()
             
             puref_[facei] = ustar_.value()*log(coordt)/kappa_.value();
             pkref_[facei] = A_.value()*log(coordt) + B_.value()*sqr(coordt) + C_.value()*coordt + D_.value() +E_.value()*log(coord2t);
-            
-            peref_[facei] = sqrt(phomCmu_[facei])*pkref_[facei]*ustar_.value()/(kappa_.value()*(pcentres_[facei] + z0_.value()));
-
-            pnref_[facei] = phomCmu_[facei]*sqr(pkref_[facei])/peref_[facei];
-
-            pGref_[facei]   = pow(ustar_.value(),3)/(kappa_.value()*coord2t);
-            
-            peterm1_[facei] = (pow(ustar_.value(),4)/pow((coord2t),2))*((C2_.value()-C1_.value())*sqrt(phomCmu_[facei])/pow(kappa_.value(),2));
-	        peterm2_[facei] = (pow(ustar_.value(),4)/pow((coord2t),2))*(1/sigmaEps_.value());
-            //peterm1_[facei] = (pow(ustar_.value(),4)/sigmaEps_.value())*(1/pow(coord2t,2));
-            //peterm2_[facei] = C1_.value()*pGref_[facei]*peref_[facei]/pkref_[facei] - C2_.value()*peref_[facei]*peref_[facei]/pkref_[facei];
-            
-            pkterm1_[facei] = (ustar_.value()*kappa_.value()/(z0_.value()*sigmak_.value()))*(4*B_.value()*coordt + C_.value());
-            
-            pkterm2_[facei] = pGref_[facei] - peref_[facei];
-        }
+	    poref_[facei] = (1/(kappa_.value()*ustar_.value()*coord2t))*pkref_[facei];
+	}
     }
-    
 }
-   
-template<class BasicMomentumTransportModel>
-void kEpsilonABL<BasicMomentumTransportModel>::errorsAndCmuComputation()
+
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+void ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::errorsAndbetaStarComputation()
 {
-    bool debug=0;
+    bool debug=1;
     if (debug)
-        Info << "Entered to computeErrorsAndCmu" << endl;
+        Info << "Entered to computeErrorsAndbetaStar" << endl;
     Uerr_ = uError();
     Kerr_ = kError();
-    Eerr_ = eError();
+    Oerr_ = oError();
     Hybriderr_ = hybridError();
     BlendingFun_ = blendingFunction();
-    NLCmu_ = nonlinearCmu();
-    homCmu_ = homogeneousCmu();
-    blendCmu_ = blendedCmu();
+    NLbetaStar_ = nonlinearbetaStar();
+    hombetaStar_ = homogeneousbetaStar();
+    blendbetaStar_ = blendedbetaStar();
 
 }
 
-template<class BasicMomentumTransportModel>
-tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::uError()
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::uError()
 {
-    bool debug=0;
+    bool debug=1;
     if (debug)
         Info << "Entered to uError" << endl;
         
@@ -204,10 +141,10 @@ tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::uError()
     return min(Udiff,scalar(1));
 }
  
-template<class BasicMomentumTransportModel>
-tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::kError()
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::kError()
 {
-    bool debug=0;
+    bool debug=1;
     if (debug)
         Info << "Entered to kError" << endl;
     volScalarField Kdiff = mag((kref_ - k_)/max(kref_,ksmall))/constantK_;
@@ -224,41 +161,41 @@ tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::kError()
     return min(Kdiff,scalar(1));
 }
     
-template<class BasicMomentumTransportModel>
-tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::eError()
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::oError()
 {
-    bool debug=0;
+    bool debug=1;
     if (debug)
-        Info << "Entered to eError" << endl;
+        Info << "Entered to oError" << endl;
 
-    volScalarField Ediff = mag((eref_ - epsilon_)/max(eref_,esmall))/constantE_;
+    volScalarField Odiff = mag((oref_ - omega_)/max(oref_,osmall))/constantO_;
         
-    forAll(Ediff,celli)
+    forAll(Odiff,celli)
     {
 
-        if(Ediff[celli] < thresholdE_.value())
+        if(Odiff[celli] < thresholdO_.value())
         {
-            Ediff[celli] = scalar(0);
+            Odiff[celli] = scalar(0);
         }
     }
 
-    return min(Ediff,scalar(1));
+    return min(Odiff,scalar(1));
 }
     
-template<class BasicMomentumTransportModel>
-tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::hybridError()
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::hybridError()
 {
-    bool debug=0;
+    bool debug=1;
     if (debug)
         Info << "Entered to hybridError" << endl;
 
-    return max(max(Uerr_,Kerr_),Eerr_);
+    return max(max(Uerr_,Kerr_),Oerr_);
 }
     
-template<class BasicMomentumTransportModel>
-tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::blendingFunction()
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::blendingFunction()
 {
-    bool debug=0;
+    bool debug=1;
     if (debug)
         Info << "Entered to blendingFunction" << endl;
 
@@ -270,59 +207,238 @@ tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::blendingFunction()
     return pow(1.0 - 0.5*(1.0 + sin(transErr)),blendCoeff_);
 }
     
-/* Non-linear Eddy-viscosity model Cmu */
-template<class BasicMomentumTransportModel>
-tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::nonlinearCmu()
+/* Non-linear Eddy-viscosity model BetaStar */
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::nonlinearbetaStar()
 {
-    bool debug=0;
+    bool debug=1;
     if (debug)
-        Info << "Entered to nonlinearCmu" << endl;
+        Info << "Entered to nonlinearbetaStar" << endl;
     volSymmTensorField S = symm(fvc::grad(this->U_));
     volTensorField W = skew(fvc::grad(this->U_));
 
-    volScalarField St = (this->k_/this->epsilon_)*sqrt(2.0)*mag(S);   //original
-    volScalarField Ot = (this->k_/this->epsilon_)*sqrt(2.0)*mag(W);   //original
+    //volScalarField St = (this->k_/epsilon())*sqrt(2.0)*mag(S);   //original
+    //volScalarField Ot = (this->k_/epsilon())*sqrt(2.0)*mag(W);   //original
+
+    volScalarField St = (1/(blendbetaStar_*this->omega_))*sqrt(2.0)*mag(S);   //original
+    volScalarField Ot = (1/(blendbetaStar_*this->omega_))*sqrt(2.0)*mag(W);   //original
 
     return min((1/(0.9*pow(St,1.4)+0.4*pow(Ot,1.4)+3.5)),0.15);
 }
     
-// Height dependent blended Cmu
-template<class BasicMomentumTransportModel>
-tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::blendedCmu()
+// Height dependent blended BetaStar
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::blendedbetaStar()
 {
-    bool debug=0;
+    bool debug=1;
     if (debug)
-        Info << "Entered to blendedCmu" << endl;
+        Info << "Entered to blendedbetaStar" << endl;
             
 
-    return NLCmu_ + (homCmu_ - NLCmu_)*blendingFunction();
+    return NLbetaStar_ + (hombetaStar_ - NLbetaStar_)*blendingFunction();
 }
-    
-// Smooth Cmu
-template<class BasicMomentumTransportModel>
-tmp<volScalarField> kEpsilonABL<BasicMomentumTransportModel>::homogeneousCmu()
+
+
+
+// Smooth betaStar
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::homogeneousbetaStar()
 {
-    bool debug=0;
+    bool debug=1;
     if (debug)
-        Info << "Entered to homogeneousCmu" << endl;
+        Info << "Entered to homogeneousbetaStar" << endl;
     
-    return min((pow(ustar_,4)/sqr(kref_)),CmuMax_);
+    return min((pow(ustar_,4)/sqr(kref_)),betaStarMax_);
 }
+
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField>
+ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::ABLkOmegaSST::F1
+(
+    const volScalarField& CDkOmega
+) const
+{
+    tmp<volScalarField> CDkOmegaPlus = max
+    (
+        CDkOmega,
+        dimensionedScalar(dimless/sqr(dimTime), 1.0e-10)
+    );
+
+    tmp<volScalarField> arg1 = min
+    (
+        min
+        (
+            max
+            (
+                (scalar(1)/blendbetaStar_)*sqrt(k_)/(omega_*y_),
+                scalar(500)*(this->mu()/this->rho_)/(sqr(y_)*omega_)
+            ),
+            (4*alphaOmega2_)*k_/(CDkOmegaPlus*sqr(y_))
+        ),
+        scalar(10)
+    );
+
+    return tanh(pow4(arg1));
+}
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField>
+ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::ABLkOmegaSST::F2() const
+{
+    tmp<volScalarField> arg2 = min
+    (
+        max
+        (
+            (scalar(2)/blendbetaStar_)*sqrt(k_)/(omega_*y_),
+            scalar(500)*(this->mu()/this->rho_)/(sqr(y_)*omega_)
+        ),
+        scalar(100)
+    );
+
+    return tanh(sqr(arg2));
+}
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField>
+ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::ABLkOmegaSST::F3() const
+{
+    tmp<volScalarField> arg3 = min
+    (
+        150*(this->mu()/this->rho_)/(omega_*sqr(y_)),
+        scalar(10)
+    );
+
+    return 1 - tanh(pow4(arg3));
+}
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField>
+ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::ABLkOmegaSST::F23() const
+{
+    tmp<volScalarField> f23(F2());
+
+    if (F3_)
+    {
+        f23.ref() *= F3();
+    }
+
+    return f23;
+}
+
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+void ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::correctNut
+(
+    const volScalarField& S2,
+    const volScalarField& F2
+)
+{
+    this->nut_ = a1_*k_/max(a1_*omega_, b1_*F2*sqrt(S2));
+    this->nut_.correctBoundaryConditions();
+    fv::options::New(this->mesh_).correct(this->nut_);
+
+    BasicTurbulenceModel::correctNut();
+}
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+void ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::correctNut()
+{
+    correctNut(2*magSqr(symm(fvc::grad(this->U_))), F23());
+}
+
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField::Internal>
+ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::Pk
+(
+    const volScalarField::Internal& G
+) const
+{
+    return min(G, (c1_*blendbetaStar_())*this->k_()*this->omega_());
+}
+
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<volScalarField::Internal>
+ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::epsilonByk
+(
+    const volScalarField::Internal& F1,
+    const volScalarField::Internal& F2
+) const
+{
+    return blendbetaStar_*omega_();
+}
+
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<fvScalarMatrix>
+ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::kSource() const
+{
+    return tmp<fvScalarMatrix>
+    (
+        new fvScalarMatrix
+        (
+            k_,
+            dimVolume*this->rho_.dimensions()*k_.dimensions()/dimTime
+        )
+    );
+}
+
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<fvScalarMatrix>
+ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::omegaSource() const
+{
+    return tmp<fvScalarMatrix>
+    (
+        new fvScalarMatrix
+        (
+            omega_,
+            dimVolume*this->rho_.dimensions()*omega_.dimensions()/dimTime
+        )
+    );
+}
+
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+tmp<fvScalarMatrix> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::Qsas
+(
+    const volScalarField::Internal& S2,
+    const volScalarField::Internal& gamma,
+    const volScalarField::Internal& beta
+) const
+{
+    return tmp<fvScalarMatrix>
+    (
+        new fvScalarMatrix
+        (
+            omega_,
+            dimVolume*this->rho_.dimensions()*omega_.dimensions()/dimTime
+        )
+    );
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class BasicMomentumTransportModel>
-kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
+template<class TurbulenceModel, class BasicTurbulenceModel>
+ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::ABLkOmegaSST
 (
+    const word& type,
     const alphaField& alpha,
     const rhoField& rho,
     const volVectorField& U,
     const surfaceScalarField& alphaRhoPhi,
     const surfaceScalarField& phi,
     const transportModel& transport,
-    const word& type
+    const word& propertiesName
 )
 :
-    eddyViscosity<RASModel<BasicMomentumTransportModel>>
+    TurbulenceModel
     (
         type,
         alpha,
@@ -330,69 +446,135 @@ kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
         U,
         alphaRhoPhi,
         phi,
-        transport
+        transport,
+        propertiesName
     ),
 
-    Cmu_
+    alphaK1_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "Cmu",
+            "alphaK1",
             this->coeffDict_,
-            0.09
+            0.85
         )
     ),
-    C1_
+    alphaK2_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "C1",
-            this->coeffDict_,
-            1.44
-        )
-    ),
-    C2_
-    (
-        dimensioned<scalar>::lookupOrAddToDict
-        (
-            "C2",
-            this->coeffDict_,
-            1.92
-        )
-    ),
-    C3_
-    (
-        dimensioned<scalar>::lookupOrAddToDict
-        (
-            "C3",
-            this->coeffDict_,
-            0
-        )
-    ),
-    sigmak_
-    (
-        dimensioned<scalar>::lookupOrAddToDict
-        (
-            "sigmak",
+            "alphaK2",
             this->coeffDict_,
             1.0
         )
     ),
-    sigmaEps_
+    alphaOmega1_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "sigmaEps",
+            "alphaOmega1",
             this->coeffDict_,
-            1.3
+            0.5
         )
     ),
-    
-    CmuMax_
+    alphaOmega2_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "CmuMax",
+            "alphaOmega2",
+            this->coeffDict_,
+            0.856
+        )
+    ),
+    gamma1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "gamma1",
+            this->coeffDict_,
+            5.0/9.0
+        )
+    ),
+    gamma2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "gamma2",
+            this->coeffDict_,
+            0.44
+        )
+    ),
+    beta1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "beta1",
+            this->coeffDict_,
+            0.075
+        )
+    ),
+    beta2_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "beta2",
+            this->coeffDict_,
+            0.0828
+        )
+    ),
+    betaStar_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "betaStar",
+            this->coeffDict_,
+            0.09
+        )
+    ),
+    a1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "a1",
+            this->coeffDict_,
+            0.31
+        )
+    ),
+    b1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "b1",
+            this->coeffDict_,
+            1.0
+        )
+    ),
+    c1_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "c1",
+            this->coeffDict_,
+            10.0
+        )
+    ),
+    F3_
+    (
+        Switch::lookupOrAddToDict
+        (
+            "F3",
+            this->coeffDict_,
+            false
+        )
+    ),
+
+    y_(wallDist::New(this->mesh_).y()),
+
+    betaStarMax_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "BetaStarMax",
             this->coeffDict_,
             0.15
         )
@@ -466,35 +648,7 @@ kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
         mag(zDir_ & this->mesh_.C())
 
     ),
-    
-    epsSource_
-    (
-        IOobject
-        (
-            "epsSource",
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        this->mesh_,
-        dimensionedScalar("epsSource", dimensionSet(0,2,-4,0,0,0,0),0.0)
-    ),
-    
-    kSource_
-    (
-        IOobject
-        (
-            "kSource",
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        this->mesh_,
-        dimensionedScalar("kSource", dimensionSet(0,2,-3,0,0,0,0),0.0)
-    ),
-    
+
     uref_
     (
         IOobject
@@ -523,34 +677,20 @@ kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
         dimensionedScalar("kref", dimensionSet(0,2,-2,0,0,0,0),0.0)
     ),
 
-    eref_
+    oref_
     (
         IOobject
         (
-            "eref",
+            "oref",
             this->runTime_.timeName(),
             this->mesh_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         this->mesh_,
-        dimensionedScalar("eref", dimensionSet(0,2,-3,0,0,0,0),0.0)
+        dimensionedScalar("oref", dimensionSet(0,0,-1,0,0,0,0),0.0)
     ),
 
-    nref_
-    (
-        IOobject
-        (
-            "nref",
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        this->mesh_,
-        dimensionedScalar("nref", dimensionSet(0,2,-1,0,0,0,0),0.0)
-    ),
-    
     Uerr_
     (
         IOobject
@@ -579,11 +719,11 @@ kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
         dimensionedScalar("Kerr", dimensionSet(0,0,0,0,0,0,0),0.0)
     ),
     
-    Eerr_
+    Oerr_
     (
         IOobject
         (
-            "Eerr",
+            "Oerr",
             this->runTime_.timeName(),
             this->mesh_,
             IOobject::NO_READ,
@@ -620,7 +760,7 @@ kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
         this->mesh_,
         dimensionedScalar("BlendingFun", dimensionSet(0,0,0,0,0,0,0),0.0)
     ),
-    
+
     A_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -675,7 +815,7 @@ kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
             0.1
         )
     ),
-    
+
     blendCoeff_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -708,11 +848,11 @@ kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
         )
     ),
     
-    thresholdE_
+    thresholdO_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "thresholdE",
+            "thresholdO",
             this->coeffDict_,
             dimensionSet(0, 0, 0, 0, 0, 0, 0),
             0.1
@@ -741,11 +881,11 @@ kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
         )
     ),
     
-    constantE_
+    constantO_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "constantE",
+            "constantO",
             this->coeffDict_,
             dimensionSet(0, 0, 0, 0, 0, 0, 0),
             10
@@ -765,134 +905,54 @@ kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
 
     usmall("usmall",dimensionSet(0,1,-1,0,0,0,0),scalar(1e-10)),
     ksmall("ksmall",dimensionSet(0,2,-2,0,0,0,0),scalar(1e-10)),
-    esmall("esmall",dimensionSet(0,2,-3,0,0,0,0),scalar(1e-10)),
+    osmall("esmall",dimensionSet(0,0,-1,0,0,0,0),scalar(1e-10)),
     
-    NLCmu_
+    NLbetaStar_
     (
         IOobject
         (
-            "NLCmu",
+            "NLBetaStar",
             this->runTime_.timeName(),
             this->mesh_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         this->mesh_,
-        dimensionedScalar("NLCmu", dimensionSet(0,0,0,0,0,0,0),0.0)
+        dimensionedScalar("NLBetaStar", dimensionSet(0,0,0,0,0,0,0),0.0)
     ),
     
-    homCmu_
+    hombetaStar_
     (
         IOobject
         (
-            "homCmu",
+            "homBetaStar",
             this->runTime_.timeName(),
             this->mesh_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         this->mesh_,
-        dimensionedScalar("homCmu", dimensionSet(0,0,0,0,0,0,0),0.0)
+        dimensionedScalar("homBetaStar", dimensionSet(0,0,0,0,0,0,0),0.0)
     ),
     
-    blendCmu_
+    blendbetaStar_
     (
         IOobject
         (
-            "blendCmu",
+            "blendbetaStar",
             this->runTime_.timeName(),
             this->mesh_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         this->mesh_,
-        dimensionedScalar("blendCmu", dimensionSet(0,0,0,0,0,0,0),0.0)
+        dimensionedScalar("blendbetaStar", dimensionSet(0,0,0,0,0,0,0),0.09)
     ),
-    
-    wSwitch_
-    (
-        IOobject
-        (
-            "wSwitch",
-         this->runTime_.timeName(),
-         this->mesh_,
-         IOobject::NO_READ,
-         IOobject::AUTO_WRITE
-        ),
-     this->mesh_,
-        dimensionedScalar("wSwitch", dimensionSet(0,0,0,0,0,0,0),1.0)
-    ),
-    
-    Gref_
-    (
-        IOobject
-        (
-            "Gref",
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        this->mesh_,
-        dimensionedScalar("Gref", dimensionSet(0,2,-3,0,0,0,0),0.0)
-    ),
-    
-    eterm1_
-    (
-        IOobject
-        (
-            "eterm1",
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        this->mesh_,
-        dimensionedScalar("eterm1", dimensionSet(0,2,-4,0,0,0,0),0.0)
-    ),
-    
-    eterm2_
-    (
-        IOobject
-        (
-            "eterm2",
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        this->mesh_,
-        dimensionedScalar("eterm2", dimensionSet(0,2,-4,0,0,0,0),0.0)
-    ),
-    
-    kterm1_
-    (
-        IOobject
-        (
-            "kterm1",
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        this->mesh_,
-        dimensionedScalar("kterm1", dimensionSet(0,2,-3,0,0,0,0),0.0)
-    ),
-    
-    kterm2_
-    (
-        IOobject
-        (
-            "kterm2",
-            this->runTime_.timeName(),
-            this->mesh_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        this->mesh_,
-        dimensionedScalar("kterm2", dimensionSet(0,2,-3,0,0,0,0),0.0)
-    ),
-    
+
+
+
+
+
     k_
     (
         IOobject
@@ -905,11 +965,11 @@ kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
         ),
         this->mesh_
     ),
-    epsilon_
+    omega_
     (
         IOobject
         (
-            IOobject::groupName("epsilon", alphaRhoPhi.group()),
+            IOobject::groupName("omega", alphaRhoPhi.group()),
             this->runTime_.timeName(),
             this->mesh_,
             IOobject::MUST_READ,
@@ -920,31 +980,35 @@ kEpsilonABL<BasicMomentumTransportModel>::kEpsilonABL
 {
     referencesComputation();
     bound(k_, this->kMin_);
-    bound(epsilon_, this->epsilonMin_);
-    errorsAndCmuComputation();
+    bound(omega_, this->omegaMin_);
+    errorsAndbetaStarComputation();    
     correctNut();
 
-    if (type == typeName)
-    {
-        this->printCoeffs(type);
-    }
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-    
-template<class BasicMomentumTransportModel>
-bool kEpsilonABL<BasicMomentumTransportModel>::read()
+
+template<class TurbulenceModel, class BasicTurbulenceModel>
+bool ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::read()
 {
-    if (eddyViscosity<RASModel<BasicMomentumTransportModel>>::read())
+    if (TurbulenceModel::read())
     {
-        Cmu_.readIfPresent(this->coeffDict());
-        C1_.readIfPresent(this->coeffDict());
-        C2_.readIfPresent(this->coeffDict());
-        C3_.readIfPresent(this->coeffDict());
-        sigmak_.readIfPresent(this->coeffDict());
-        sigmaEps_.readIfPresent(this->coeffDict());
-        CmuMax_.readIfPresent(this->coeffDict());
+        alphaK1_.readIfPresent(this->coeffDict());
+        alphaK2_.readIfPresent(this->coeffDict());
+        alphaOmega1_.readIfPresent(this->coeffDict());
+        alphaOmega2_.readIfPresent(this->coeffDict());
+        gamma1_.readIfPresent(this->coeffDict());
+        gamma2_.readIfPresent(this->coeffDict());
+        beta1_.readIfPresent(this->coeffDict());
+        beta2_.readIfPresent(this->coeffDict());
+        betaStar_.readIfPresent(this->coeffDict());
+        a1_.readIfPresent(this->coeffDict());
+        b1_.readIfPresent(this->coeffDict());
+        c1_.readIfPresent(this->coeffDict());
+        F3_.readIfPresent("F3", this->coeffDict());
+
+        betaStarMax_.readIfPresent(this->coeffDict());
         
         z0_.readIfPresent(this->coeffDict());
         kappa_.readIfPresent(this->coeffDict());
@@ -961,10 +1025,10 @@ bool kEpsilonABL<BasicMomentumTransportModel>::read()
         
         thresholdU_.readIfPresent(this->coeffDict());
         thresholdK_.readIfPresent(this->coeffDict());
-        thresholdE_.readIfPresent(this->coeffDict());
+        thresholdO_.readIfPresent(this->coeffDict());
         constantU_.readIfPresent(this->coeffDict());
         constantK_.readIfPresent(this->coeffDict());
-        constantE_.readIfPresent(this->coeffDict());
+        constantO_.readIfPresent(this->coeffDict());
         
         msel_.readIfPresent(this->coeffDict());
 
@@ -977,8 +1041,8 @@ bool kEpsilonABL<BasicMomentumTransportModel>::read()
 }
 
 
-template<class BasicMomentumTransportModel>
-void kEpsilonABL<BasicMomentumTransportModel>::correct()
+template<class TurbulenceModel, class BasicTurbulenceModel>
+void ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::correct()
 {
     if (!this->turbulence_)
     {
@@ -994,8 +1058,8 @@ void kEpsilonABL<BasicMomentumTransportModel>::correct()
     volScalarField& nut = this->nut_;
     fv::options& fvOptions(fv::options::New(this->mesh_));
 
-    eddyViscosity<RASModel<BasicMomentumTransportModel>>::correct();
-    
+    BasicTurbulenceModel::correct();
+
     if (this->mesh_.changing())
     {
         referencesComputation();
@@ -1003,76 +1067,102 @@ void kEpsilonABL<BasicMomentumTransportModel>::correct()
 
     volScalarField::Internal divU
     (
-        fvc::div(fvc::absolute(this->phi(), U))().v()
+        fvc::div(fvc::absolute(this->phi(), U))()()
     );
 
     tmp<volTensorField> tgradU = fvc::grad(U);
-
-    volScalarField::Internal G
-    (
-        this->GName(),
-        nut.v()*(dev(twoSymm(tgradU().v())) && tgradU().v())
-    );
-    
+    volScalarField S2(2*magSqr(symm(tgradU())));
+    volScalarField::Internal GbyNu(dev(twoSymm(tgradU()())) && tgradU()());
+    volScalarField::Internal G(this->GName(), nut()*GbyNu);
     tgradU.clear();
 
-    // Source terms computation
-    epsSource_ = ABLepsilonSource()*blendingFunction();
-    
-    if(B_.value() + C_.value() != scalar(0))
-        kSource_ = ABLkSource()*blendingFunction();
-    else
-        kSource_ = 0.0*ABLkSource();
-    
-    
-    // Update epsilon and G at the wall
-    epsilon_.boundaryFieldRef().updateCoeffs();
+    // Update omega and G at the wall
+    omega_.boundaryFieldRef().updateCoeffs();
 
-    // Dissipation equation
-    tmp<fvScalarMatrix> epsEqn
-     (
-         fvm::ddt(epsilon_)
-       + fvm::div(phi, epsilon_)
-       //- fvm::Sp(fvc::div(phi),epsilon_)
-       - fvm::laplacian(DepsilonEff(), epsilon_)
-      ==
-         C1_*G*epsilon_()/k_()
-       - fvm::Sp(C2_*epsilon_()/k_(), epsilon_)
-       + epsSource_
-     );
-    
+    volScalarField CDkOmega
+    (
+        (2*alphaOmega2_)*(fvc::grad(k_) & fvc::grad(omega_))/omega_
+    );
 
-    epsEqn.ref().relax();
-    epsEqn.ref().boundaryManipulate(epsilon_.boundaryFieldRef());
-    solve(epsEqn);
-    bound(epsilon_, this->epsilonMin_);
-    
+    volScalarField F1(this->F1(CDkOmega));
+    volScalarField F23(this->F23());
+
+    volScalarField blendNL = blendingFunction();
+
+    {
+        volScalarField::Internal gamma(this->gamma(F1));
+        volScalarField::Internal beta(this->beta(F1));
+
+
+        // Turbulent frequency equation
+        tmp<fvScalarMatrix> omegaEqn
+        (
+            fvm::ddt(omega_)
+          + fvm::div(phi, omega_)
+          - fvm::laplacian(DomegaEff(F1), omega_)
+         ==
+           gamma
+           *min
+            (
+                GbyNu,
+                (c1_/a1_)*blendbetaStar_()*omega_()
+               *max(a1_*omega_(), b1_*F23()*sqrt(S2()))
+            )
+          - fvm::Sp(beta*omega_(), omega_)
+          - fvm::SuSp
+            (
+                (F1() - scalar(1))*CDkOmega()/omega_(),
+                omega_
+            )
+          - fvc::laplacian(DomegaEff(F1), omega_)*blendNL
+          - (gamma
+            *min
+             (
+                GbyNu,
+                (c1_/a1_)*blendbetaStar_()*omega_()
+               *max(a1_*omega_(), b1_*F23()*sqrt(S2()))
+             ))*blendNL
+          + (beta*omega_()*omega_())*blendNL
+	  + ((F1()-scalar(1))*CDkOmega())*blendNL
+        );
+
+        omegaEqn.ref().relax();
+        fvOptions.constrain(omegaEqn.ref());
+        omegaEqn.ref().boundaryManipulate(omega_.boundaryFieldRef());
+        solve(omegaEqn);
+        fvOptions.correct(omega_);
+        bound(omega_, this->omegaMin_);
+    }
+
     // Turbulent kinetic energy equation
     tmp<fvScalarMatrix> kEqn
     (
         fvm::ddt(k_)
       + fvm::div(phi, k_)
-     - fvm::Sp(fvc::div(phi),k_)
-      - fvm::laplacian(DkEff(), k_)
+      - fvm::laplacian(DkEff(F1), k_)
      ==
-        G
-      - fvm::Sp(epsilon_()/k_(), k_)
-      + kSource_
+       Pk(G)
+      - fvm::Sp(epsilonByk(F1, F23), k_)
+      - fvc::laplacian(DkEff(F1), k_)*blendNL
+      - Pk(G)*blendNL
+      + (epsilonByk(F1, F23)*k_())*blendNL
     );
 
     kEqn.ref().relax();
+    fvOptions.constrain(kEqn.ref());
     solve(kEqn);
+    fvOptions.correct(k_);
     bound(k_, this->kMin_);
 
-    errorsAndCmuComputation();
-    correctNut();
+    correctNut(S2, F23);
 
+    errorsAndbetaStarComputation();
+    correctNut();
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
 } // End namespace Foam
 
 // ************************************************************************* //
