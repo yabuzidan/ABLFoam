@@ -1,0 +1,67 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+
+kappa                0.4;   // (kappa = 0.4 for equilibrium ; HW2007)
+Cmu                  0.09;
+Uref                 10.0;
+Zref                 20.0;
+zDir                 (0 0 1);
+flowDir              (1 0 0);
+z0                   0.02;
+zGround              uniform 0.0;
+
+
+// When using atmBoundaryLayerParante
+
+// C1                  0;   //  Curve-fitting coefficient (RH when C1=0)
+// C2                  1;   //  Curve-fitting coefficient (RH when C2=1)
+
+C1                    -0.5;   //  Curve-fitting coefficient (RH when C1=0)
+C2                    4;   //  Curve-fitting coefficient (RH when C2=1)
+
+// Note: If C1 < 0, Z0 is small, and Zmax is large, code may fail due to negative value under sqrt (to fix)
+
+
+// ************************************************************************* //
+
+// Calculate ABL friction velocity U*
+ustar #calc     "$Uref*$kappa / log(($Zref+$z0) / $z0)";
+
+// ************************************************************************* //
+
+// Parameters for fitting TKE profile
+A                    0;
+B                    0;
+C                    0;
+D                    $C2;
+E                    $C1;
+
+CmuMax  0.15;     // Upper limit for Cmu calculated based on Parente et al Eq.11
+BW      0;        // Flag for TKE profile (0: Eq.7 Balogh et al)
+hABL    1;        // TKE profile parameter, used when BW/=0 
+
+
+// Belnding parameters
+kappaWF         $kappa;
+Etke            $E;      // Same parameter as E. Renamed Etke in WF code to avoid conflict with Edash 
+WFCmu           0.09;    // Cmu in Wake Field. No effect if blendCoeff = 0
+blendCoeff      0.0;     // Blending parameter "alpha" in Eq.22 Bellegoni et al (2023). blendCoeff = 0 for homogenous ABL
+roughWall       1;       // Flag for epsilon and nut wall functions
+
+
+// Upper limits on deltau, deltak and deltae (Eq. 23 Bellegoni 2023)
+// No effect if blendedCoeff
+thresholdU      1;
+thresholdE      1;
+thresholdK      1;
+
+// Attenuation parameter to avoid over-extent of BIA. (=1/A in Eq. 23 of Bellegoni et al (2023))?
+// No effect if blendedCoeff = 0 
+constantU       1; // Au = 1
+constantE       10; // Ak = 0.1
+constantK       10; // Ae = 0.1
