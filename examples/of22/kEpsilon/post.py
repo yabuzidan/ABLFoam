@@ -9,29 +9,25 @@ import matplotlib.pyplot as plt
 
 # %%
 import os
-endTime = max(os.listdir('postProcessing/incidentGraph'))
+endTime = max(os.listdir('postProcessing/samples_u'))
 
-# Load inlet data
-data1 = pd.read_csv('postProcessing/inletGraph/'+endTime+'/line_U.csv')
-data2 = pd.read_csv('postProcessing/inletGraph/'+endTime+'/line_p_k_epsilon_nut.csv')
 
-Z_inlet = data1['z']
-U_inlet = data1['U_0']
-k_inlet = data2['k']
-epsilon_inlet = data2['epsilon']
-nut_inlet = data2['nut']
-p_inlet = data2['p']
+endTime
 
-# Load incident data
-data1 = pd.read_csv('postProcessing/incidentGraph/'+endTime+'/line_U.csv')
-data2 = pd.read_csv('postProcessing/incidentGraph/'+endTime+'/line_p_k_epsilon_nut.csv')
+U_incident = pd.read_csv('postProcessing/samples_u/'+endTime+'/incident_U.csv')['U_0']
+U_inlet    = pd.read_csv('postProcessing/samples_u/'+endTime+'/inlet_U.csv')['U_0']
 
-Z_incident = data1['z']
-U_incident = data1['U_0']
-k_incident = data2['k']
-epsilon_incident = data2['epsilon']
-nut_incident = data2['nut']
-p_incident = data2['p']
+k_incident = pd.read_csv('postProcessing/samples_k/'+endTime+'/incident_k.csv')['k']
+k_inlet    = pd.read_csv('postProcessing/samples_k/'+endTime+'/inlet_k.csv')['k']
+
+epsilon_incident = pd.read_csv('postProcessing/samples_epsilon/'+endTime+'/incident_epsilon.csv')['epsilon']
+epsilon_inlet    = pd.read_csv('postProcessing/samples_epsilon/'+endTime+'/inlet_epsilon.csv')['epsilon']
+
+nut_incident = pd.read_csv('postProcessing/samples_nut/'+endTime+'/incident_nut.csv')['nut']
+nut_inlet    = pd.read_csv('postProcessing/samples_nut/'+endTime+'/inlet_nut.csv')['nut']
+
+Z_incident = pd.read_csv('postProcessing/samples_u/'+endTime+'/incident_U.csv')['z']
+Z_inlet    = pd.read_csv('postProcessing/samples_u/'+endTime+'/inlet_U.csv')['z']
 
 # %%
 # Function for calculating average inhomogeneity error
@@ -125,3 +121,6 @@ for axis in axes:
 
 plt.tight_layout()
 plt.savefig('plot_ABL.jpg', dpi=300)
+
+
+# %%
