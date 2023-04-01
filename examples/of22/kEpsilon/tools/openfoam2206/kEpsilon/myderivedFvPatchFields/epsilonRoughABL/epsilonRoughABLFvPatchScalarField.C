@@ -631,7 +631,7 @@ void Foam::epsilonRoughABLFvPatchScalarField::updateCoeffs()
     (
         IOobject::groupName
         (
-            turbulenceModel::typeName,
+            turbulenceModel::propertiesName,
             internalField().group()
         )
     );
@@ -683,7 +683,7 @@ void Foam::epsilonRoughABLFvPatchScalarField::updateWeightedCoeffs
     (
         IOobject::groupName
         (
-            turbulenceModel::typeName,
+            turbulenceModel::propertiesName,
             internalField().group()
         )
     );

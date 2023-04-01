@@ -39,11 +39,6 @@ boundaryField
 
     ground
     {
-        // // type            epsilonWallFunction;
-        // // #include        "include/ABLConditions"
-        // // E               9.8;
-        // // value           $internalField;
-         
         type            epsilonRoughABL;
         #include        "include/ABLConditions"
 
