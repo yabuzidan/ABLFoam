@@ -64,14 +64,14 @@ SourceFiles
 #ifndef epsilonRoughABLFvPatchScalarField_H
 #define epsilonRoughABLFvPatchScalarField_H
 
+#include "epsilonWallFunctionFvPatchScalarField.H"
 #include "fixedValueFvPatchField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class turbulenceModel;
+    
 
 /*---------------------------------------------------------------------------*\
            Class epsilonRoughABLFvPatchScalarField Declaration
