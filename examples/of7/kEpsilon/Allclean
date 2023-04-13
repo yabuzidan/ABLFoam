@@ -9,8 +9,4 @@ cleanCase
 rm -f *.foam
 rm -f *.jpg
 
-# cd tools/atmModelsParante/BoundaryLayer; wclean libso;  cd ../../..;
-# cd tools/atmModelsParante/TurbulenceModels; wclean libso;  cd ../../..;
-# cd tools/atmModelsParante/WallFunctions; wclean libso;  cd ../../..;
-
 #------------------------------------------------------------------------------

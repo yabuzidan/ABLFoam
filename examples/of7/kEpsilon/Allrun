@@ -7,11 +7,6 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Create mesh
 runApplication blockMesh
 
-# # Compile custom code
-# cd tools/openfoam7/kEpsilon; wmake libso . >> ../../../log.wmake;  cd ../../..;
-# cd tools/openfoam7/kOmegaSST; wmake libso . >> ../../../log.wmake;  cd ../../..;
-# cd tools/openfoam7/kOmegaSST_F1blend; wmake libso . >> ../../../log.wmake;  cd ../../..;
-
 # Run solver
 runApplication $(getApplication)
 
