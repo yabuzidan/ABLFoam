@@ -1,0 +1,175 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  8
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version         2.0;
+    format          ascii;
+    class           dictionary;
+    object          blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    // Domain dimensions
+    xMin   -5000;
+    xMax   400;
+    yMin   -25;
+    yMax   25;
+    zMin   0;
+    zMax   500;
+
+    // Cell divisions in each direction
+    xCells  40;
+    yCells  1;   //2D simulation
+    zCells  40;
+
+convertToMeters 1;
+
+vertices
+(
+    ($xMin $yMin $zMin)
+    ($xMax $yMin $zMin)
+    ($xMax $yMax $zMin)
+    ($xMin $yMax $zMin)
+
+    ($xMin $yMin $zMax)
+    ($xMax $yMin $zMax)
+    ($xMax $yMax $zMax)
+    ($xMin $yMax $zMax)
+);
+
+blocks
+(
+    hex (0 1 2 3 4 5 6 7)
+    (
+        $xCells
+        $yCells
+        $zCells
+    )
+
+    // yP is height of ground adjacent cell
+
+    // // yP ~ 6.25 m | y+ ~ 7.6e5
+    // simpleGrading (1 1 1)
+
+    // yP ~ 1.58 m | y+ ~ 1.94 e4
+    simpleGrading (1 1 10)
+
+    // // yP ~ 0.28 m | y+ ~ 3.4e4
+    // simpleGrading (1 1 100)
+
+    // // yP ~ 0.04 m | y+ ~ 4920
+    // simpleGrading (1 1 1000)
+
+    // // yP ~ 0.01 m | y+ ~ 635
+    // simpleGrading (1 1 10000)
+
+    // // yP ~ 0.0006 m | y+ ~ 7.7
+    // simpleGrading (1 1 100000)
+
+
+
+    // NOTE: GRIDS BELOW HAVE AN ABRUPT CHANGE IN GRID SIZE NEAR THE WALL; CAUSING A PEAK IN TKE N0T SEEN WITH GRIDS ABOVE.
+
+    // // yP ~ 0.61 m | y+ ~ 7.3e4
+    // simpleGrading (
+    //     1
+    //     1
+    //     (
+    //      (0.1 0.25 10)
+    //      (0.9 0.75 1)
+    //      )
+    //    )
+
+    // // yP ~ 0.01 m | y+ ~ 1.2e3
+    // simpleGrading (
+    //     1
+    //     1
+    //     (
+    //      (0.01 0.25 100)
+    //      (0.99 0.75 1)
+    //      )
+    //    )
+
+    // // yP ~ 0.001 m | y+ ~ 160
+    // simpleGrading (
+    //     1
+    //     1
+    //     (
+    //      (0.01 0.25 1000)
+    //      (0.99 0.75 1)
+    //      )
+    //    )
+
+);
+
+edges
+(
+);
+
+boundary
+(
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (1 5 6 2)
+        );
+    }
+    sides_1
+    {
+        type empty;
+        faces
+        (
+            (0 4 5 1)
+        );
+    }
+    sides_2
+    {
+        type empty;
+        faces
+        (
+            (3 2 6 7)
+        );
+    }
+
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (0 3 7 4)
+        );
+    }
+
+    ground
+    {
+        type wall;
+        faces
+        (
+            (0 1 2 3)
+        );
+    }
+
+    top
+    {
+        type wall;
+        faces
+        (
+            (4 7 6 5)
+
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+
+// ************************************************************************* //
