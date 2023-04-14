@@ -66,8 +66,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nutRoughABLWallFunctionFvPatchScalarField_H
-#define nutRoughABLWallFunctionFvPatchScalarField_H
+#ifndef NutRoughABLWallFunctionFvPatchScalarField_H
+#define NutRoughABLWallFunctionFvPatchScalarField_H
 
 #include "nutkWallFunctionFvPatchScalarField.H"
 
@@ -77,10 +77,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-          Class nutRoughABLWallFunctionFvPatchScalarField Declaration
+          Class NutRoughABLWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class nutRoughABLWallFunctionFvPatchScalarField
+class NutRoughABLWallFunctionFvPatchScalarField
 :
     public nutkWallFunctionFvPatchScalarField
 {
@@ -130,7 +130,7 @@ protected:
         //- Calculate blending function
         virtual scalar blendingFunction(const scalar Uerr, const scalar blendCoeff) const;
         //- Calculate the turbulence viscosity
-        virtual tmp<scalarField> nut() const;
+        virtual tmp<scalarField> calcNut() const;
 
 
 public:
@@ -142,14 +142,14 @@ public:
     // Constructors
 
         //- Construct from patch and internal field
-        nutRoughABLWallFunctionFvPatchScalarField
+        NutRoughABLWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        nutRoughABLWallFunctionFvPatchScalarField
+        NutRoughABLWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -157,20 +157,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutRoughABLWallFunctionFvPatchScalarField
+        //  NutRoughABLWallFunctionFvPatchScalarField
         //  onto a new patch
-        nutRoughABLWallFunctionFvPatchScalarField
+        NutRoughABLWallFunctionFvPatchScalarField
         (
-            const nutRoughABLWallFunctionFvPatchScalarField&,
+            const NutRoughABLWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Copy constructor
-        nutRoughABLWallFunctionFvPatchScalarField
+        NutRoughABLWallFunctionFvPatchScalarField
         (
-            const nutRoughABLWallFunctionFvPatchScalarField&
+            const NutRoughABLWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -178,14 +178,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutRoughABLWallFunctionFvPatchScalarField(*this)
+                new NutRoughABLWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Copy constructor setting internal field reference
-        nutRoughABLWallFunctionFvPatchScalarField
+        NutRoughABLWallFunctionFvPatchScalarField
         (
-            const nutRoughABLWallFunctionFvPatchScalarField&,
+            const NutRoughABLWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -197,7 +197,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutRoughABLWallFunctionFvPatchScalarField(*this, iF)
+                new NutRoughABLWallFunctionFvPatchScalarField(*this, iF)
             );
         }
 
