@@ -36,7 +36,7 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-scalar nutRoughABLWallFunctionFvPatchScalarField::blendingFunction
+scalar NutRoughABLWallFunctionFvPatchScalarField::blendingFunction
 (
     const scalar BIA,
     const scalar blendCoeff
@@ -48,11 +48,11 @@ scalar nutRoughABLWallFunctionFvPatchScalarField::blendingFunction
 }
 
 
-tmp<scalarField> nutRoughABLWallFunctionFvPatchScalarField::nut() const
+tmp<scalarField> NutRoughABLWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchi = patch().index();
 
-    const turbulenceModel& turbModel = db().lookupObject<turbulenceModel>
+    const auto& turbModel = db().lookupObject<turbulenceModel>
     (
         IOobject::groupName
         (
@@ -89,7 +89,7 @@ tmp<scalarField> nutRoughABLWallFunctionFvPatchScalarField::nut() const
     const scalarField kref = A_*log(coord) + B_*sqr(coord) + C_*(coord)+ D_ +Etke_*log(coord2);
     const scalarField hombetaStar = min(pow(ustar_,4)/sqr(kref),betaStarMax_);
     const scalarField oref = (ustar_/sqrt(hombetaStar))/(kappaWF_*coord2);
-
+    
     // Calculate errors
     const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
     const volVectorField& Ut = turbModel.U();
@@ -194,8 +194,8 @@ tmp<scalarField> nutRoughABLWallFunctionFvPatchScalarField::nut() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nutRoughABLWallFunctionFvPatchScalarField::
-nutRoughABLWallFunctionFvPatchScalarField
+NutRoughABLWallFunctionFvPatchScalarField::
+NutRoughABLWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -224,10 +224,10 @@ nutRoughABLWallFunctionFvPatchScalarField
 {}
 
 
-nutRoughABLWallFunctionFvPatchScalarField::
-nutRoughABLWallFunctionFvPatchScalarField
+NutRoughABLWallFunctionFvPatchScalarField::
+NutRoughABLWallFunctionFvPatchScalarField
 (
-    const nutRoughABLWallFunctionFvPatchScalarField& ptf,
+    const NutRoughABLWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -255,8 +255,8 @@ nutRoughABLWallFunctionFvPatchScalarField
 {}
 
 
-nutRoughABLWallFunctionFvPatchScalarField::
-nutRoughABLWallFunctionFvPatchScalarField
+NutRoughABLWallFunctionFvPatchScalarField::
+NutRoughABLWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -285,10 +285,10 @@ nutRoughABLWallFunctionFvPatchScalarField
 {}
 
 
-nutRoughABLWallFunctionFvPatchScalarField::
-nutRoughABLWallFunctionFvPatchScalarField
+NutRoughABLWallFunctionFvPatchScalarField::
+NutRoughABLWallFunctionFvPatchScalarField
 (
-    const nutRoughABLWallFunctionFvPatchScalarField& rwfpsf
+    const NutRoughABLWallFunctionFvPatchScalarField& rwfpsf
 )
 :
     nutkWallFunctionFvPatchScalarField(rwfpsf),
@@ -313,10 +313,10 @@ nutRoughABLWallFunctionFvPatchScalarField
 {}
 
 
-nutRoughABLWallFunctionFvPatchScalarField::
-nutRoughABLWallFunctionFvPatchScalarField
+NutRoughABLWallFunctionFvPatchScalarField::
+NutRoughABLWallFunctionFvPatchScalarField
 (
-    const nutRoughABLWallFunctionFvPatchScalarField& rwfpsf,
+    const NutRoughABLWallFunctionFvPatchScalarField& rwfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -344,7 +344,7 @@ nutRoughABLWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void nutRoughABLWallFunctionFvPatchScalarField::autoMap
+void NutRoughABLWallFunctionFvPatchScalarField::autoMap
 (
     const fvPatchFieldMapper& m
 )
@@ -371,7 +371,7 @@ void nutRoughABLWallFunctionFvPatchScalarField::autoMap
 }
 
 
-void nutRoughABLWallFunctionFvPatchScalarField::rmap
+void NutRoughABLWallFunctionFvPatchScalarField::rmap
 (
     const fvPatchScalarField& ptf,
     const labelList& addr
@@ -379,8 +379,8 @@ void nutRoughABLWallFunctionFvPatchScalarField::rmap
 {
     nutkWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
-    const nutRoughABLWallFunctionFvPatchScalarField& nrwfpsf =
-        refCast<const nutRoughABLWallFunctionFvPatchScalarField>(ptf);
+    const NutRoughABLWallFunctionFvPatchScalarField& nrwfpsf =
+        refCast<const NutRoughABLWallFunctionFvPatchScalarField>(ptf);
 
     z0_.rmap(nrwfpsf.z0_, addr);
     ustar_.rmap(nrwfpsf.ustar_, addr);
@@ -403,29 +403,29 @@ void nutRoughABLWallFunctionFvPatchScalarField::rmap
 }
 
 
-void nutRoughABLWallFunctionFvPatchScalarField::write(Ostream& os) const
+void NutRoughABLWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
     writeEntry("value", os);
-   os.writeEntry("z0", z0_);
-   os.writeEntry("ustar", ustar_);
-   os.writeEntry("kappaWF", kappaWF_);
-   os.writeEntry("A", A_);
-   os.writeEntry("B", B_);
-   os.writeEntry("C", C_);
-   os.writeEntry("D", D_);
-   os.writeEntry("Etke", Etke_);
-   os.writeEntry("betaStarMax", betaStarMax_);
-   os.writeEntry("blendCoeff", blendCoeff_);
-   os.writeEntry("zDir", zDir_);
-   os.writeEntry("roughWall", roughWall_);
-   os.writeEntry("thresholdU", thresholdU_);
-   os.writeEntry("thresholdO", thresholdO_);
-   os.writeEntry("thresholdK", thresholdK_);
-   os.writeEntry("constantU", constantU_);
-   os.writeEntry("constantO", constantO_);
-   os.writeEntry("constantK", constantK_);
+    os.writeEntry("z0", z0_);
+    os.writeEntry("ustar", ustar_);
+    os.writeEntry("kappaWF", kappaWF_);
+    os.writeEntry("A", A_);
+    os.writeEntry("B", B_);
+    os.writeEntry("C", C_);
+    os.writeEntry("D", D_);
+    os.writeEntry("Etke", Etke_);
+    os.writeEntry("betaStarMax", betaStarMax_);
+    os.writeEntry("blendCoeff", blendCoeff_);
+    os.writeEntry("zDir", zDir_);
+    os.writeEntry("roughWall", roughWall_);
+    os.writeEntry("thresholdU", thresholdU_);
+    os.writeEntry("thresholdO", thresholdO_);
+    os.writeEntry("thresholdK", thresholdK_);
+    os.writeEntry("constantU", constantU_);
+    os.writeEntry("constantO", constantO_);
+    os.writeEntry("constantK", constantK_);
 }
 
 
@@ -434,7 +434,7 @@ void nutRoughABLWallFunctionFvPatchScalarField::write(Ostream& os) const
 makePatchTypeField
 (
     fvPatchScalarField,
-    nutRoughABLWallFunctionFvPatchScalarField
+    NutRoughABLWallFunctionFvPatchScalarField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
