@@ -39,7 +39,7 @@ namespace Foam
 template<class TurbulenceModel, class BasicTurbulenceModel>
 void ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::referencesComputation()
 {
-    bool debug=1;
+    bool debug=0;
     if (debug)
         Info << "Entered to referencesComputation" << endl;
     
@@ -106,7 +106,7 @@ void ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::referencesComputation(
 template<class TurbulenceModel, class BasicTurbulenceModel>
 void ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::errorsAndbetaStarComputation()
 {
-    bool debug=1;
+    bool debug=0;
     if (debug)
         Info << "Entered to computeErrorsAndbetaStar" << endl;
     Uerr_ = uError();
@@ -121,7 +121,7 @@ void ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::errorsAndbetaStarCompu
 template<class TurbulenceModel, class BasicTurbulenceModel>
 tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::uError()
 {
-    bool debug=1;
+    bool debug=0;
     if (debug)
         Info << "Entered to uError" << endl;
         
@@ -142,7 +142,7 @@ tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::uError(
 template<class TurbulenceModel, class BasicTurbulenceModel>
 tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::kError()
 {
-    bool debug=1;
+    bool debug=0;
     if (debug)
         Info << "Entered to kError" << endl;
     volScalarField Kdiff = mag((kref_ - k_)/max(kref_,ksmall))/constantK_;
@@ -162,7 +162,7 @@ tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::kError(
 template<class TurbulenceModel, class BasicTurbulenceModel>
 tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::oError()
 {
-    bool debug=1;
+    bool debug=0;
     if (debug)
         Info << "Entered to oError" << endl;
 
@@ -183,7 +183,7 @@ tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::oError(
 template<class TurbulenceModel, class BasicTurbulenceModel>
 tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::hybridError()
 {
-    bool debug=1;
+    bool debug=0;
     if (debug)
         Info << "Entered to hybridError" << endl;
 
@@ -194,7 +194,7 @@ template<class TurbulenceModel, class BasicTurbulenceModel>
 tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::blendingFunction()
 const
 {
-    bool debug=1;
+    bool debug=0;
     if (debug)
         Info << "Entered to blendingFunction" << endl;
 
@@ -210,7 +210,7 @@ const
 template<class TurbulenceModel, class BasicTurbulenceModel>
 tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::homogeneousbetaStar()
 {
-    bool debug=1;
+    bool debug=0;
     if (debug)
         Info << "Entered to homogeneousbetaStar" << endl;
     
