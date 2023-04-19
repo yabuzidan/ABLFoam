@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     | Website:  https://openfoam.org
-    \\  /    A nd           | Version:  7
+    \\  /    A nd           | Version:  8
      \\/     M anipulation  |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -28,13 +28,12 @@ boundaryField
     {
         type            OmegaABL;
         #include        "include/ABLConditions"
+        value           $internalField;
     }
 
     outlet
     {
-        type            inletOutlet;
-        inletValue      uniform $turbulentOmega;
-        value           $internalField;
+        type            zeroGradient;
     }
 
     ground
@@ -44,19 +43,15 @@ boundaryField
 
         z0              uniform $z0;
         ustar           uniform $ustar;
-        kappaWF         uniform $kappaWF;
         
         A               uniform $A;
         B               uniform $B;
         C               uniform $C;
         D               uniform $D;
         Etke            uniform $E;
-
-        WFCmu           uniform $WFCmu;
         CmuMax          uniform $CmuMax;
         blendCoeff      uniform $blendCoeff;
         zDir            uniform $zDir;
-        roughWall       uniform $roughWall;
 
         thresholdU      uniform $thresholdU;
         thresholdE      uniform $thresholdE;
@@ -71,17 +66,20 @@ boundaryField
         betaStarMax     uniform $betaStarMax;
         WFbetaStar      uniform $WFbetaStar;
 
+        roughWall       uniform 1.0;
+        kappaWF         uniform $kappa;
+
         value           $internalField;
     }
 
-    // building
-    // {
-    //     type            omegaWallFunction;
-    //     Cmu             0.09;
-    //     kappa           0.4;
-    //     E               9.8;
-    //     value           $internalField;
-    // }
+    building
+    {
+        type            omegaWallFunction;
+        Cmu             0.09;
+        kappa           0.4;
+        E               9.8;
+        value           $internalField;
+    }
 
     #include "include/sideAndTopPatches"
 

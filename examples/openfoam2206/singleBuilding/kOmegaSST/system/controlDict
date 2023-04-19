@@ -23,13 +23,13 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         5000;
+endTime         500;
 
 deltaT          1;
 
 writeControl    timeStep;
 
-writeInterval   5000;
+writeInterval   500;
 
 purgeWrite      1;
 
@@ -47,14 +47,14 @@ runTimeModifiable true;
 
 libs
 (
-  "myLibABL.so"                      //kEpsilon
+  // "myLibABL.so"                      //kEpsilon
   // "myLibABLkOmegaSST.so"             //kOmegaSST
-  // "myLibABLkOmegaSST_diffblend.so"   //kOmegaSST_F1blend
+  "myLibABLkOmegaSST_diffblend.so"   //kOmegaSST_F1blend
  );
 
 functions
 {
-  #include  "sampleLines"
+
 }
 
 // ************************************************************************* //

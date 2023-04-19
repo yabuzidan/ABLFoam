@@ -14,5 +14,3 @@ runApplication $(getApplication)
 rm -rf processor* > /dev/null 2>&1
 rm -rf dynamicCode  > /dev/null 2>&1
 
-# Run Post
-python3 post.py  # > /dev/null 2>&1

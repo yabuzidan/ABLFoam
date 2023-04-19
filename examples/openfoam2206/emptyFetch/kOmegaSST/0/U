@@ -28,6 +28,7 @@ boundaryField
     {
         type            VelocityABL;
         #include        "include/ABLConditions"
+        value            $internalField;
     }
 
     outlet 
@@ -36,19 +37,19 @@ boundaryField
         inletValue      uniform (0 0 0);
         value           $internalField;
     }
-    
+
     ground      
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
 
-    // building      
-    // {
-    //     type            fixedValue;
-    //     value           uniform (0 0 0);
-    // }
-    
+    building      
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
+
     #include "include/sideAndTopPatches"
 
     top
@@ -60,7 +61,6 @@ boundaryField
         type fixedShearStress;
 
         #include        "include/ABLConditions"
-        #include        "../system/blockMeshDict"
 
         tau_x #calc     "pow($ustar,2)";
        

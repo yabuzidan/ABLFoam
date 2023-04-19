@@ -11,22 +11,22 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      epsilon;
+    object      omega;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include        "include/initialConditions"
 
-dimensions      [0 2 -3 0 0 0 0];
+dimensions      [0 0 -1 0 0 0 0];
 
-internalField   uniform $turbulentEpsilon;
+internalField   uniform $turbulentOmega;
 
 boundaryField
 {
 
     inlet
     {
-        type            EpsilonABL;
+        type            OmegaABL;
         #include        "include/ABLConditions"
         value           $internalField;
     }
@@ -37,8 +37,8 @@ boundaryField
     }
 
     ground
-    {
-        type            epsilonRoughABL;
+    {       
+        type            omegaRoughABL;
         #include        "include/ABLConditions"
 
         z0              uniform $z0;
@@ -49,8 +49,6 @@ boundaryField
         C               uniform $C;
         D               uniform $D;
         Etke            uniform $E;
-
-        WFCmu           uniform $WFCmu;
         CmuMax          uniform $CmuMax;
         blendCoeff      uniform $blendCoeff;
         zDir            uniform $zDir;
@@ -71,31 +69,17 @@ boundaryField
         roughWall       uniform 1.0;
         kappaWF         uniform $kappa;
 
-        E               9.793;
-        value           uniform 0;
+        value           $internalField;
     }
 
     building
     {
-        type            epsilonWallFunction;
-        value           uniform 1.125;
+        type            omegaWallFunction;
+        value           $internalField;
     }
 
     #include "include/sideAndTopPatches"
 
-    top
-    {
-        type fixedValue;
-
-        #include        "include/ABLConditions"
-        #include        "../system/blockMeshDict"
-
-        topEps #calc    "(pow($ustar,3) / ($kappa * ($zMax+$z0)))";
-       
-        value uniform $topEps;
-    }
-
 }
-
 
 // ************************************************************************* //

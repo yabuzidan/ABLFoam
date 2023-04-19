@@ -49,8 +49,6 @@ boundaryField
         C               uniform $C;
         D               uniform $D;
         Etke            uniform $E;
-
-        WFCmu           uniform $WFCmu;
         CmuMax          uniform $CmuMax;
         blendCoeff      uniform $blendCoeff;
         zDir            uniform $zDir;
@@ -88,8 +86,8 @@ boundaryField
         type fixedValue;
 
         #include        "include/ABLConditions"
-        #include        "../system/blockMeshDict"
-
+        
+        zMax            1.0;
         topEps #calc    "(pow($ustar,3) / ($kappa * ($zMax+$z0)))";
        
         value uniform $topEps;

@@ -38,9 +38,9 @@ hABL            1;        // TKE profile parameter, used when BW is selected
 // Blending coefficient
 blendCoeff      1;      // Blending coefficient "alpha" in Eq.22 Bellegoni et al (2023).
 
-// Turbulence model constants upper limit
-CmuMax          0.35;     // Upper limit for Cmu in undistrubed flow (kEpsilon)
-BetaStarMax     0.35;     // Upper limit for betaStarMax in undisturbed flow (kOmegaSST)
+// Upper limit turbulence model constants upper
+CmuMax          0.35;     // Upper limit for Cmu (kEpsilon)
+BetaStarMax     0.35;     // Upper limit for betaStarMax (kOmegaSST)
 betaStarMax     $BetaStarMax; // Duplicate variable
 
 

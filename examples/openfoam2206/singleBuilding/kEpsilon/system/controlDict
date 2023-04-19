@@ -23,13 +23,13 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         5000;
+endTime         500;
 
 deltaT          1;
 
 writeControl    timeStep;
 
-writeInterval   5000;
+writeInterval   500;
 
 purgeWrite      1;
 
@@ -54,7 +54,7 @@ libs
 
 functions
 {
-  #include  "sampleLines"
+
 }
 
 // ************************************************************************* //

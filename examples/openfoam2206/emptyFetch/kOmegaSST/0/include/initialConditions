@@ -6,10 +6,10 @@
      \\/     M anipulation  |
 \*---------------------------------------------------------------------------*/
 
-flowVelocity         (0 0 0);
+flowVelocity         (5 0 0);
 pressure             0;
-turbulentKE          1;
-turbulentEpsilon     0.01;
-turbulentOmega       0.01;
+turbulentKE          0.6;
+turbulentEpsilon     1;
+turbulentOmega       10;
 
 // ************************************************************************* //

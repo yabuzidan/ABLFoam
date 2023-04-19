@@ -43,7 +43,7 @@ SIMPLE
 
     residualControl
     {
-        "(p|U|k|epsilon|omega|nut)" 1e-6;
+        "(p|U|k|epsilon|omega|nut)" 1e-5;
     }
 }
 

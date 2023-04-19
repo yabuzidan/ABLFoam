@@ -9,65 +9,59 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       volVectorField;
+    class       volScalarField;
     location    "0";
-    object      U;
+    object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include        "include/initialConditions"
 
-dimensions      [0 1 -1 0 0 0 0];
+dimensions      [0 2 -2 0 0 0 0];
 
-internalField   uniform $flowVelocity;
+internalField   uniform $turbulentKE;
 
 boundaryField
 {
 
     inlet
     {
-        type            VelocityABL;
+        type            kABL;
         #include        "include/ABLConditions"
         value            $internalField;
     }
 
-    outlet 
+    outlet
     {
-        type            inletOutlet;
-        inletValue      uniform (0 0 0);
-        value           $internalField;
+        type            zeroGradient;
     }
 
-    ground      
+    ground
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            zeroGradient;
     }
 
-    building      
+    building
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            kqRWallFunction;
+        value           uniform 0.357075;
     }
 
     #include "include/sideAndTopPatches"
 
     top
     {
-        //  Calculate horizontal shear stress to apply at top boundary
-        // (Hargreaves & Wright, 2007: p. 358)
-        // Note: rho (denisty) = 1 in OF
-        
-        type fixedShearStress;
+        type fixedValue;
 
         #include        "include/ABLConditions"
-
-        tau_x #calc     "pow($ustar,2)";
+        
+        zMax            1.0;
+        topK #calc      "$A*log(($zMax + $z0)/$z0) + $B*sqr(($zMax + $z0)/$z0) + $C*(($zMax + $z0)/$z0)+ $D +$E*log($zMax + $z0)";
        
-        tau ($tau_x 0 0);
-        value uniform (0 0 0);
+        value uniform $topK;
     }
 
 }
+
 
 // ************************************************************************* //

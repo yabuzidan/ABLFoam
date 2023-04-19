@@ -88,8 +88,8 @@ boundaryField
         type fixedValue;
 
         #include        "include/ABLConditions"
-        #include        "../system/blockMeshDict"
-
+        
+        zMax            1.0;
         topEps #calc    "(pow($ustar,3) / ($kappa * ($zMax+$z0)))";
        
         value uniform $topEps;
