@@ -16,9 +16,11 @@ z0                  0.00075;
 // Calculate ABL friction velocity U*
 ustar               #calc "$Uref*$kappa / log(($Zref+$z0) / $z0)";
 
+
 // ************************************************************************* //
 
 // Curve-fitting coefficients for TKE profile
+
 // A*log((z + z0)/z) + B*sqr((z + z0)/z0) + C(z + z0)/z0)+ D + E*log(z + z0)
 // Note: If Zmax is large, code may fail due to negative value under sqrt
 
@@ -36,38 +38,49 @@ E               -0.04;    //C1 in Bellegoni
 // D                    #calc  "pow($ustar,2) / pow(0.09,0.5)"; // Richards Hoxey
 // E                    0;
 
-// ************************************************************************* //
-
-BW              0;        // Flag for alternative TKE profile (0: Eq.7 Balogh et al)
+// Alternative TKE profile
+BW              0;        // Flag for alternative TKE profile
 hABL            1;        // TKE profile parameter, used when BW is selected
 
+// ************************************************************************* //
+
 // Blending coefficient
-blendCoeff      0;        // Blending coefficient "alpha" in Eq.22 Bellegoni et al (2023). blendCoeff = 0 for homogenous ABL
+blendCoeff      0;      // Blending coefficient "alpha" in Eq.22 Bellegoni et al (2023). blendCoeff = 0 for homogenous ABLs
 
-//Upper limits on CmuMax/betaStarMax. May affect homogeniety at upper end of domain if small
-CmuMax          0.35;     // Upper limit for Cmu (for kEpsilon)
-betaStarMax     0.35;     // Upper limit for betaStarMax (for OmegaSST)
+// Upper limit turbulence model constants upper
+CmuMax          0.35;     // Upper limit for Cmu (kEpsilon)
+betaStarMax     0.35;     // Upper limit for betaStarMax (kOmegaSST)
 
-// Wall function parameters
+// Wall function parameters (move to boundary condition)
 roughWall       1;       // Flag for wall functions (1 = Rough wall)
 kappaWF         $kappa;  // Kappa parameter in wall function. Set = kappa.
 Etke            $E;      // Same as E. Renamed Etke in wall function code to avoid conflict with (Edash=9.793)
 
-// Turbulence model constant in Wake field (e.g. building influence area).
+// Turbulence model constants in distrubed region / wake field (WF)
 // No effect when blendCoeff = 0
-WFCmu           0.09;    // Cmu in Wake Field (for kEpsilon)
-WFbetaStar      0.09;    // betaStar in Wake Field (for OmegaSST)
+WFCmu           0.09;    // kEpsilon
+WFbetaStar      0.09;    // kOmegaSST
 
-// Upper limits on deltaU, deltaK and deltaE (Eq. 23 Bellegoni 2023)
-// No effect when blendedCoeff = 0 
-thresholdU      5;
-thresholdE      5;
-thresholdK      5;
-thresholdO      5;
+// ************************************************************************* //
 
-// Attenuation parameter to avoid over-extending of Building Influence Area (BIA). (=1/A in Eq. 23 of Bellegoni et al (2023))?
+// Threshold/minimum deviation of U, k, epsilon, omega (%) to switch to detect distrubed region. Default values are fine.
+// No effect when blendedCoeff = 0
+thresholdU      0.05;
+thresholdK      0.3;
+thresholdE      0.1;
+thresholdO      0.1;
+
+// Attenuation parameters to avoid over-extending of disturbed region (Building Influence Area).
+// =1/A in Eq. 23 of Bellegoni et al (2023)
 // No effect when blendedCoeff = 0 
 constantU       1;        // Au = 1
-constantE       10;       // Ak = 0.1
-constantK       10;       // Ae = 0.1
+constantK       10;       // Ak = 0.1
+constantE       10;       // Ae = 0.1
 constantO       10;       // Ae = 0.1
+
+// Method for detecting disturbed region 
+// (1 0 0) : Detects based on deviation of U
+// (0 1 0) : Detects based on deviation of K
+// (0 1 0) : Detects based on deviation of max(U,k,epsilon/omega)
+msel            (0 0 1);
+
