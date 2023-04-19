@@ -23,20 +23,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "epsilonRoughABLFvPatchScalarField.H"
+#include "omegaRoughABLWallFunctionFvPatchScalarField.H"
 #include "nutWallFunctionFvPatchScalarField.H"
 #include "turbulenceModel.H"
 #include "fvMatrix.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvc.H"
-#include "fixedGradientFvPatchField.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::scalar Foam::epsilonRoughABLFvPatchScalarField::tolerance_ = 1e-5;
+scalar omegaRoughABLWallFunctionFvPatchScalarField::tolerance_ = 1e-5;
 
-// * * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * //
-Foam::scalar Foam::epsilonRoughABLFvPatchScalarField::blendingFunction
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+Foam::scalar Foam::omegaRoughABLWallFunctionFvPatchScalarField::blendingFunction
 (
     const scalar BIA,
     const scalar blendCoeff
@@ -47,44 +50,44 @@ Foam::scalar Foam::epsilonRoughABLFvPatchScalarField::blendingFunction
    return pow(1.0 - 0.5*(1.0 + sin(transErr)),blendCoeff);
 }
 
-void Foam::epsilonRoughABLFvPatchScalarField::setMaster()
+void omegaRoughABLWallFunctionFvPatchScalarField::setMaster()
 {
     if (master_ != -1)
     {
         return;
     }
 
-    const volScalarField& epsilon =
+    const volScalarField& omega =
         static_cast<const volScalarField&>(this->internalField());
 
-    const volScalarField::Boundary& bf = epsilon.boundaryField();
+    const volScalarField::Boundary& bf = omega.boundaryField();
 
     label master = -1;
     forAll(bf, patchi)
     {
-        if (isA<epsilonRoughABLFvPatchScalarField>(bf[patchi]))
+        if (isA<omegaRoughABLWallFunctionFvPatchScalarField>(bf[patchi]))
         {
-            epsilonRoughABLFvPatchScalarField& epf = epsilonPatch(patchi);
+            omegaRoughABLWallFunctionFvPatchScalarField& opf = omegaPatch(patchi);
 
             if (master == -1)
             {
                 master = patchi;
             }
 
-            epf.master() = master;
+            opf.master() = master;
         }
     }
 }
 
 
-void Foam::epsilonRoughABLFvPatchScalarField::createAveragingWeights()
+void omegaRoughABLWallFunctionFvPatchScalarField::createAveragingWeights()
 {
-    const volScalarField& epsilon =
+    const volScalarField& omega =
         static_cast<const volScalarField&>(this->internalField());
 
-    const volScalarField::Boundary& bf = epsilon.boundaryField();
+    const volScalarField::Boundary& bf = omega.boundaryField();
 
-    const fvMesh& mesh = epsilon.mesh();
+    const fvMesh& mesh = omega.mesh();
 
     if (initialised_ && !mesh.changing())
     {
@@ -106,91 +109,92 @@ void Foam::epsilonRoughABLFvPatchScalarField::createAveragingWeights()
         dimensionedScalar(dimless, 0)
     );
 
-    DynamicList<label> epsilonPatches(bf.size());
+    DynamicList<label> omegaPatches(bf.size());
     forAll(bf, patchi)
     {
-        if (isA<epsilonRoughABLFvPatchScalarField>(bf[patchi]))
+        if (isA<omegaRoughABLWallFunctionFvPatchScalarField>(bf[patchi]))
         {
-            epsilonPatches.append(patchi);
+            omegaPatches.append(patchi);
 
             const labelUList& faceCells = bf[patchi].patch().faceCells();
             forAll(faceCells, i)
             {
-                weights[faceCells[i]]++;
+                label celli = faceCells[i];
+                weights[celli]++;
             }
         }
     }
 
     cornerWeights_.setSize(bf.size());
-    forAll(epsilonPatches, i)
+    forAll(omegaPatches, i)
     {
-        label patchi = epsilonPatches[i];
+        label patchi = omegaPatches[i];
         const fvPatchScalarField& wf = weights.boundaryField()[patchi];
         cornerWeights_[patchi] = 1.0/wf.patchInternalField();
     }
 
     G_.setSize(internalField().size(), 0.0);
-    epsilon_.setSize(internalField().size(), 0.0);
+    omega_.setSize(internalField().size(), 0.0);
 
     initialised_ = true;
 }
 
 
-Foam::epsilonRoughABLFvPatchScalarField&
-Foam::epsilonRoughABLFvPatchScalarField::epsilonPatch(const label patchi)
+omegaRoughABLWallFunctionFvPatchScalarField&
+omegaRoughABLWallFunctionFvPatchScalarField::omegaPatch(const label patchi)
 {
-    const volScalarField& epsilon =
+    const volScalarField& omega =
         static_cast<const volScalarField&>(this->internalField());
 
-    const volScalarField::Boundary& bf = epsilon.boundaryField();
+    const volScalarField::Boundary& bf = omega.boundaryField();
 
-    const epsilonRoughABLFvPatchScalarField& epf =
-        refCast<const epsilonRoughABLFvPatchScalarField>(bf[patchi]);
+    const omegaRoughABLWallFunctionFvPatchScalarField& opf =
+        refCast<const omegaRoughABLWallFunctionFvPatchScalarField>(bf[patchi]);
 
-    return const_cast<epsilonRoughABLFvPatchScalarField&>(epf);
+    return const_cast<omegaRoughABLWallFunctionFvPatchScalarField&>(opf);
 }
 
 
-void Foam::epsilonRoughABLFvPatchScalarField::calculateTurbulenceFields
+void omegaRoughABLWallFunctionFvPatchScalarField::calculateTurbulenceFields
 (
-    const turbulenceModel& turbulence,
+    const turbulenceModel& turbModel,
     scalarField& G0,
-    scalarField& epsilon0
+    scalarField& omega0
 )
 {
-    // Accumulate all of the G and epsilon contributions
+    // accumulate all of the G and omega contributions
     forAll(cornerWeights_, patchi)
     {
         if (!cornerWeights_[patchi].empty())
         {
-            epsilonRoughABLFvPatchScalarField& epf = epsilonPatch(patchi);
+            omegaRoughABLWallFunctionFvPatchScalarField& opf = omegaPatch(patchi);
 
             const List<scalar>& w = cornerWeights_[patchi];
 
-            epf.calculate(turbulence, w, epf.patch(), G0, epsilon0);
+            opf.calculate(turbModel, w, opf.patch(), G0, omega0);
         }
     }
 
-    // Apply zero-gradient condition for epsilon
+    // apply zero-gradient condition for omega
     forAll(cornerWeights_, patchi)
     {
         if (!cornerWeights_[patchi].empty())
         {
-            epsilonRoughABLFvPatchScalarField& epf = epsilonPatch(patchi);
+            omegaRoughABLWallFunctionFvPatchScalarField& opf = omegaPatch(patchi);
 
-            epf == scalarField(epsilon0, epf.patch().faceCells());
+            opf == scalarField(omega0, opf.patch().faceCells());
         }
     }
 }
 
 
-void Foam::epsilonRoughABLFvPatchScalarField::calculate
+void omegaRoughABLWallFunctionFvPatchScalarField::calculate
 (
     const turbulenceModel& turbModel,
     const List<scalar>& cornerWeights,
     const fvPatch& patch,
     scalarField& G0,
-    scalarField& epsilon0
+    scalarField& omega0
 )
 {
     const label patchi = patch.index();
@@ -200,39 +204,48 @@ void Foam::epsilonRoughABLFvPatchScalarField::calculate
 
     const scalarField& y = turbModel.y()[patchi];
 
-    const tmp<scalarField> tnuw = turbModel.nu(patchi);
-    const scalarField& nuw = tnuw();
-    
     const tmp<volScalarField> tk = turbModel.k();
     const volScalarField& k = tk();
-    
+
     const tmp<volScalarField> te = turbModel.epsilon();
     const volScalarField& epsilon = te();
 
+    const tmp<scalarField> tnuw = turbModel.nu(patchi);
+    const scalarField& nuw = tnuw();
 
     const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
 
     const scalarField magGradUw(mag(Uw.snGrad()));
 
-    // Get first cell centroid
-    scalarField ccentre = zDir_ & patch.Cn();
+    const FieldType& G =
+        db().lookupObject<FieldType>(turbModel.GName());
+
+    /*const volVectorField& Ut = turbModel.U();
+    vectorField Uwt = Uw;
     forAll(nutw, facei)
+    {
+      label faceCelli = patch.faceCells()[facei];
+      Uwt[facei] = Ut[faceCelli];
+    }*/
+    // Get first cell centroid
+    const scalarField ccentre = zDir_ & patch.Cn();
+    /*forAll(nutw, facei)
     {
         if(roughWall_[facei] > 0)
         {
             ccentre = y[facei];
         }
-    }
+    }*/
 
     const scalarField coord = (ccentre + z0_)/z0_;
     const scalarField coord2 = (ccentre + z0_);
     
     // Calculate references
-    const scalarField uref = ustar_*log(coord)/kappaWF_;
+    const scalarField uref = ustar_*log(coord)/kappaWF_;   
     const scalarField kref = A_*log(coord) + B_*sqr(coord) + C_*(coord)+ D_ +Etke_*log(coord2);
-    const scalarField homCmu = min(pow(ustar_,4)/sqr(kref),CmuMax_);
-    const scalarField eref = (sqrt(homCmu)*ustar_*kref)/(kappaWF_*coord2);
-    
+    const scalarField hombetaStar = min(pow(ustar_,4)/sqr(kref),betaStarMax_);
+    const scalarField oref = (ustar_/sqrt(hombetaStar))/(kappaWF_*coord2);
+
     // Calculate errors
     const volVectorField& Ut = turbModel.U();
     vectorField Uwt = Uw;
@@ -244,7 +257,7 @@ void Foam::epsilonRoughABLFvPatchScalarField::calculate
     
     scalarField Uerr  = mag((uref - Uwt.component(0))/max(uref,uref*1e-14))/constantU_;
     scalarField kerr = mag((kref - k)/max(kref,kref*1e-14))/constantK_;
-    scalarField Eerr = mag((eref - epsilon)/max(eref,eref*1e-14))/constantE_;
+    scalarField Oerr = mag((oref - (epsilon/(hombetaStar*k)))/max(oref,oref*1e-14))/constantO_;
     
     forAll(Uerr, facei)
   
@@ -272,68 +285,93 @@ void Foam::epsilonRoughABLFvPatchScalarField::calculate
         }
     }
     
-    forAll(Eerr, facei)
+    forAll(Oerr, facei)
   
     {
-        if(Eerr[facei] < thresholdE_[facei])
+        if(Oerr[facei] < thresholdO_[facei])
         {
-            Eerr[facei] = scalar(0);
+            Oerr[facei] = scalar(0);
         }
-        if(Eerr[facei] > scalar(1))
+        if(Oerr[facei] > scalar(1))
         {
-            Eerr[facei] = scalar(1);
+            Oerr[facei] = scalar(1);
         }
     }
 
-    scalarField herr = max(max(Uerr,kerr),Eerr);
-    
-    // Set epsilon and G
+    scalarField herr = max(max(Uerr,kerr),Oerr);
+
+    const labelUList& faceCells = patch.faceCells();
+
+
+    // Set omega and G
     forAll(nutw, facei)
     {
         const label celli = patch.faceCells()[facei];
-        
-        scalar bCmu = WFCmu_[facei] + (homCmu[facei] - WFCmu_[facei])*blendingFunction(herr[facei],blendCoeff_[facei]);
-        
-        const scalar Cmu25 = pow025(bCmu);
-        const scalar Cmu05 = pow(bCmu,0.5);
-        const scalar Cmu75 = pow(bCmu,0.75);
+
+        scalar bbetaStar = WFbetaStar_[facei] + (hombetaStar[facei] - WFbetaStar_[facei])*blendingFunction(herr[facei],blendCoeff_[facei]);
+
+    	const scalar betaStar25 = pow025(bbetaStar);
+    	const scalar betaStar5 = sqrt(bbetaStar);
 
         const scalar w = cornerWeights[facei];
-        
-        if(roughWall_[facei] > scalar(0)) // Rough case
-        {
-            /*epsilon0[celli] +=
-            w*Cmu05*k[celli]*ustar_[facei]/(kappaWF_[facei]*(y[facei]+z0_[facei]));*/
-            epsilon0[celli] +=
-            w*Cmu75*pow(k[celli],1.5)/(kappaWF_[facei]*(y[facei]+z0_[facei]));
 
-        // Production of k - Original implementation in code from Leo, Parente
+        const scalar Rey = y[facei]*sqrt(k[celli])/nuw[facei];
+        const scalar yPlus = betaStar25*Rey;
+        const scalar uPlus = (1/nutw.kappa())*log(nutw.E()*yPlus);
+
+        if (blended_)
+        {
+            const scalar lamFrac = exp(-Rey/11);
+            const scalar turbFrac = 1 - lamFrac;
+
+            const scalar uStar = sqrt
+            (
+                lamFrac*nuw[facei]*magGradUw[facei] + turbFrac*betaStar5*k[celli]
+            );
+
+            const scalar omegaVis = 6*nuw[facei]/(beta1_*sqr(y[facei]));
+            const scalar omegaLog = uStar/(betaStar5*nutw.kappa()*y[facei]);
+
+            omega0[celli] += w*(lamFrac*omegaVis + turbFrac*omegaLog);
+
             G0[celli] +=
                 w
-               *(0.52)*log((2*y[facei]+z0_[facei])/z0_[facei])*(nutw[facei] + nuw[facei])
-               *magGradUw[facei]
-               *Cmu25*sqrt(k[celli])
-              /(kappaWF_[facei]*(y[facei] + z0_[facei]));
-        
-        // Production of k (Parante 2011 Eq 24) - YA
-            // G0[celli] +=
-            // w
-            // *pow((nutw[celli] + nuw[facei])
-            // *magGradUw[celli],2)
-            // /(Cmu25*sqrt(k[celli])
-            // *kappaWF_[facei]*(y[facei] + z0_[facei]));
+               *(
+                   lamFrac*G[celli]
+
+                 + turbFrac
+                  *sqr(uStar*magGradUw[facei]*y[facei]/uPlus)
+                  /(nuw[facei]*nutw.kappa()*yPlus)
+               );
         }
         else
         {
-            epsilon0[celli] +=
-            w*Cmu05*k[celli]*ustar_[facei]/(kappaWF_[facei]*(y[facei]));
+            /*if (yPlus < nutw.yPlusLam())
+            {
+                const scalar omegaVis = 6*nuw[facei]/(beta1_*sqr(y[facei]));
 
-            G0[celli] +=
-                w
-               *(nutw[facei] + nuw[facei])
-               *magGradUw[facei]
-               *Cmu25*sqrt(k[celli])
-              /(kappaWF_[facei]*(y[facei]));
+                omega0[celli] += w*omegaVis;
+
+                G0[celli] += w*G[celli];
+            }
+            else
+            {
+                const scalar uStar = sqrt(betaStar5*k[celli]);
+                const scalar omegaLog = uStar/(betaStar5*nutw.kappa()*y[facei]);*/
+
+                //omega0[celli] += w*omegaLog;
+		omega0[celli] += w*(1/(nutw.kappa()*ustar_[facei]*(y[facei] + z0_[facei])))
+				  *k[celli];
+
+                G0[celli] +=
+            	w
+           	*(nutw[facei] + nuw[facei])
+           	*magGradUw[facei]
+           	*betaStar25*sqrt(k[celli])
+           /(nutw.kappa()*(y[facei] + z0_[facei]));
+                    //w*
+                    //sqr(uStar*magGradUw[facei]*y[facei]/uPlus)
+                   ///(nuw[facei]*nutw.kappa()*yPlus);
         }
     }
 }
@@ -341,16 +379,17 @@ void Foam::epsilonRoughABLFvPatchScalarField::calculate
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::epsilonRoughABLFvPatchScalarField::
-epsilonRoughABLFvPatchScalarField
+omegaRoughABLWallFunctionFvPatchScalarField::omegaRoughABLWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
+    beta1_(0.075),
+    blended_(false),
     G_(),
-    epsilon_(),
+    omega_(),
     initialised_(false),
     master_(-1),
     cornerWeights_(),
@@ -362,22 +401,21 @@ epsilonRoughABLFvPatchScalarField
     C_(p.size(), 0.0),
     D_(p.size(), 1.37),
     Etke_(p.size(), 0),
-    WFCmu_(p.size(),0.15),
-    CmuMax_(p.size(),0.15),
+    WFbetaStar_(p.size(),0.15),
+    betaStarMax_(p.size(),0.15),
     blendCoeff_(p.size(), 0.0),
     zDir_(p.size(), vector(0, 0, 1)),
     roughWall_(p.size(), 1.0),
     thresholdU_(p.size(), 0.3),
-    thresholdE_(p.size(), 0.5),
+    thresholdO_(p.size(), 0.5),
     thresholdK_(p.size(), 0.5),
     constantU_(p.size(), 1),
-    constantE_(p.size(), 3),
+    constantO_(p.size(), 3),
     constantK_(p.size(), 10)
 {}
 
 
-Foam::epsilonRoughABLFvPatchScalarField::
-epsilonRoughABLFvPatchScalarField
+omegaRoughABLWallFunctionFvPatchScalarField::omegaRoughABLWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -385,8 +423,10 @@ epsilonRoughABLFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
+    beta1_(dict.lookupOrDefault<scalar>("beta1", 0.075)),
+    blended_(dict.lookupOrDefault<Switch>("blended", false)),
     G_(),
-    epsilon_(),
+    omega_(),
     initialised_(false),
     master_(-1),
     cornerWeights_(),
@@ -398,35 +438,36 @@ epsilonRoughABLFvPatchScalarField
     C_("C", dict, p.size()),
     D_("D", dict, p.size()),
     Etke_("Etke", dict, p.size()),
-    WFCmu_("WFCmu", dict, p.size()),
-    CmuMax_("CmuMax", dict, p.size()),
+    WFbetaStar_("WFbetaStar", dict, p.size()),
+    betaStarMax_("betaStarMax", dict, p.size()),
     blendCoeff_("blendCoeff", dict, p.size()),
     zDir_("zDir", dict, p.size()),
     roughWall_("roughWall", dict, p.size()),
     thresholdU_("thresholdU", dict, p.size()),
-    thresholdE_("thresholdE", dict, p.size()),
+    thresholdO_("thresholdO", dict, p.size()),
     thresholdK_("thresholdK", dict, p.size()),
     constantU_("constantU", dict, p.size()),
-    constantE_("constantE", dict, p.size()),
+    constantO_("constantO", dict, p.size()),
     constantK_("constantK", dict, p.size())
 {
-    // Apply zero-gradient condition on start-up
+    // apply zero-gradient condition on start-up
     this->operator==(patchInternalField());
 }
 
 
-Foam::epsilonRoughABLFvPatchScalarField::
-epsilonRoughABLFvPatchScalarField
+omegaRoughABLWallFunctionFvPatchScalarField::omegaRoughABLWallFunctionFvPatchScalarField
 (
-    const epsilonRoughABLFvPatchScalarField& ptf,
+    const omegaRoughABLWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
+    beta1_(ptf.beta1_),
+    blended_(ptf.blended_),
     G_(),
-    epsilon_(),
+    omega_(),
     initialised_(false),
     master_(-1),
     cornerWeights_(),
@@ -438,89 +479,91 @@ epsilonRoughABLFvPatchScalarField
     C_(mapper(ptf.C_)),
     D_(mapper(ptf.D_)),
     Etke_(mapper(ptf.Etke_)),
-    WFCmu_(mapper(ptf.WFCmu_)),
-    CmuMax_(mapper(ptf.CmuMax_)),
+    WFbetaStar_(mapper(ptf.WFbetaStar_)),
+    betaStarMax_(mapper(ptf.betaStarMax_)),
     blendCoeff_(mapper(ptf.blendCoeff_)),
     zDir_(mapper(ptf.zDir_)),
     roughWall_(mapper(ptf.roughWall_)),
     thresholdU_(mapper(ptf.thresholdU_)),
-    thresholdE_(mapper(ptf.thresholdE_)),
+    thresholdO_(mapper(ptf.thresholdO_)),
     thresholdK_(mapper(ptf.thresholdK_)),
     constantU_(mapper(ptf.constantU_)),
-    constantE_(mapper(ptf.constantE_)),
+    constantO_(mapper(ptf.constantO_)),
     constantK_(mapper(ptf.constantK_))
 {}
 
 
-Foam::epsilonRoughABLFvPatchScalarField::
-epsilonRoughABLFvPatchScalarField
+omegaRoughABLWallFunctionFvPatchScalarField::omegaRoughABLWallFunctionFvPatchScalarField
 (
-    const epsilonRoughABLFvPatchScalarField& ewfpsf
+    const omegaRoughABLWallFunctionFvPatchScalarField& owfpsf
 )
 :
-    fixedValueFvPatchField<scalar>(ewfpsf),
+    fixedValueFvPatchField<scalar>(owfpsf),
+    beta1_(owfpsf.beta1_),
+    blended_(owfpsf.blended_),
     G_(),
-    epsilon_(),
+    omega_(),
     initialised_(false),
     master_(-1),
     cornerWeights_(),
-    z0_(ewfpsf.z0_),
-    ustar_(ewfpsf.ustar_),
-    kappaWF_(ewfpsf.kappaWF_),
-    A_(ewfpsf.A_),
-    B_(ewfpsf.B_),
-    C_(ewfpsf.C_),
-    D_(ewfpsf.D_),
-    Etke_(ewfpsf.Etke_),
-    WFCmu_(ewfpsf.WFCmu_),
-    CmuMax_(ewfpsf.CmuMax_),
-    blendCoeff_(ewfpsf.blendCoeff_),
-    zDir_(ewfpsf.zDir_),
-    roughWall_(ewfpsf.roughWall_),
-    thresholdU_(ewfpsf.thresholdU_),
-    thresholdE_(ewfpsf.thresholdE_),
-    thresholdK_(ewfpsf.thresholdK_),
-    constantU_(ewfpsf.constantU_),
-    constantE_(ewfpsf.constantE_),
-    constantK_(ewfpsf.constantK_)
+    z0_(owfpsf.z0_),
+    ustar_(owfpsf.ustar_),
+    kappaWF_(owfpsf.kappaWF_),
+    A_(owfpsf.A_),
+    B_(owfpsf.B_),
+    C_(owfpsf.C_),
+    D_(owfpsf.D_),
+    Etke_(owfpsf.Etke_),
+    WFbetaStar_(owfpsf.WFbetaStar_),
+    betaStarMax_(owfpsf.betaStarMax_),
+    blendCoeff_(owfpsf.blendCoeff_),
+    zDir_(owfpsf.zDir_),
+    roughWall_(owfpsf.roughWall_),
+    thresholdU_(owfpsf.thresholdU_),
+    thresholdO_(owfpsf.thresholdO_),
+    thresholdK_(owfpsf.thresholdK_),
+    constantU_(owfpsf.constantU_),
+    constantO_(owfpsf.constantO_),
+    constantK_(owfpsf.constantK_)
 
 {}
 
 
-Foam::epsilonRoughABLFvPatchScalarField::
-epsilonRoughABLFvPatchScalarField
+omegaRoughABLWallFunctionFvPatchScalarField::omegaRoughABLWallFunctionFvPatchScalarField
 (
-    const epsilonRoughABLFvPatchScalarField& ewfpsf,
+    const omegaRoughABLWallFunctionFvPatchScalarField& owfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchField<scalar>(ewfpsf, iF),
+    fixedValueFvPatchField<scalar>(owfpsf, iF),
+    beta1_(owfpsf.beta1_),
+    blended_(owfpsf.blended_),
     G_(),
-    epsilon_(),
+    omega_(),
     initialised_(false),
     master_(-1),
     cornerWeights_(),
-    z0_(ewfpsf.z0_),
-    ustar_(ewfpsf.ustar_),
-    kappaWF_(ewfpsf.kappaWF_),
-    A_(ewfpsf.A_),
-    B_(ewfpsf.B_),
-    C_(ewfpsf.C_),
-    D_(ewfpsf.D_),
-    WFCmu_(ewfpsf.WFCmu_),
-    CmuMax_(ewfpsf.CmuMax_),
-    blendCoeff_(ewfpsf.blendCoeff_),
-    zDir_(ewfpsf.zDir_),
-    roughWall_(ewfpsf.roughWall_),
-    thresholdU_(ewfpsf.thresholdU_),
-    thresholdE_(ewfpsf.thresholdE_),
-    thresholdK_(ewfpsf.thresholdK_),
-    constantU_(ewfpsf.constantU_),
-    constantE_(ewfpsf.constantE_),
-    constantK_(ewfpsf.constantK_)
+    z0_(owfpsf.z0_),
+    ustar_(owfpsf.ustar_),
+    kappaWF_(owfpsf.kappaWF_),
+    A_(owfpsf.A_),
+    B_(owfpsf.B_),
+    C_(owfpsf.C_),
+    D_(owfpsf.D_),
+    WFbetaStar_(owfpsf.WFbetaStar_),
+    betaStarMax_(owfpsf.betaStarMax_),
+    blendCoeff_(owfpsf.blendCoeff_),
+    zDir_(owfpsf.zDir_),
+    roughWall_(owfpsf.roughWall_),
+    thresholdU_(owfpsf.thresholdU_),
+    thresholdO_(owfpsf.thresholdO_),
+    thresholdK_(owfpsf.thresholdK_),
+    constantU_(owfpsf.constantU_),
+    constantO_(owfpsf.constantO_),
+    constantK_(owfpsf.constantK_)
 {}
 
-void Foam::epsilonRoughABLFvPatchScalarField::autoMap(const fvPatchFieldMapper& m)
+void Foam::omegaRoughABLWallFunctionFvPatchScalarField::autoMap(const fvPatchFieldMapper& m)
 {
     m(z0_,z0_);
     m(ustar_,ustar_);
@@ -530,22 +573,22 @@ void Foam::epsilonRoughABLFvPatchScalarField::autoMap(const fvPatchFieldMapper& 
     m(C_,C_);
     m(D_,D_);
     m(Etke_,Etke_);
-    m(WFCmu_,WFCmu_);
-    m(CmuMax_,CmuMax_);
+    m(WFbetaStar_,WFbetaStar_);
+    m(betaStarMax_,betaStarMax_);
     m(blendCoeff_,blendCoeff_);
     m(zDir_,zDir_);
     m(roughWall_,roughWall_);
     m(thresholdU_,thresholdU_);
-    m(thresholdE_,thresholdE_);
+    m(thresholdO_,thresholdO_);
     m(thresholdK_,thresholdK_);
     m(constantU_,constantU_);
-    m(constantE_,constantE_);
+    m(constantO_,constantO_);
     m(constantK_,constantK_);
 }
 
-void Foam::epsilonRoughABLFvPatchScalarField::rmap
+void Foam::omegaRoughABLWallFunctionFvPatchScalarField::rmap
 (
-    const epsilonRoughABLFvPatchScalarField& blptf,
+    const omegaRoughABLWallFunctionFvPatchScalarField& blptf,
     const labelList& addr
 )
 {
@@ -557,44 +600,22 @@ void Foam::epsilonRoughABLFvPatchScalarField::rmap
     C_.rmap(blptf.C_, addr);
     D_.rmap(blptf.D_, addr);
     Etke_.rmap(blptf.Etke_, addr);
-    WFCmu_.rmap(blptf.WFCmu_, addr);
-    CmuMax_.rmap(blptf.CmuMax_, addr);
+    WFbetaStar_.rmap(blptf.WFbetaStar_, addr);
+    betaStarMax_.rmap(blptf.betaStarMax_, addr);
     blendCoeff_.rmap(blptf.blendCoeff_, addr);
     zDir_.rmap(blptf.zDir_,addr);
     roughWall_.rmap(blptf.roughWall_, addr);
     thresholdU_.rmap(blptf.thresholdU_, addr);
-    thresholdE_.rmap(blptf.thresholdE_, addr);
+    thresholdO_.rmap(blptf.thresholdO_, addr);
     thresholdK_.rmap(blptf.thresholdK_, addr);
     constantU_.rmap(blptf.constantU_, addr);
-    constantE_.rmap(blptf.constantE_, addr);
+    constantO_.rmap(blptf.constantO_, addr);
     constantK_.rmap(blptf.constantK_, addr);
 }
-void Foam::epsilonRoughABLFvPatchScalarField::write(Ostream& os) const
-{
-    fixedValueFvPatchField<scalar>::write(os);
-    writeEntry(os,"z0", z0_);
-    writeEntry(os,"ustar", ustar_);
-    writeEntry(os,"kappaWF", kappaWF_);
-    writeEntry(os,"A", A_);
-    writeEntry(os,"B", B_);
-    writeEntry(os,"C", C_);
-    writeEntry(os,"D", D_);
-    writeEntry(os,"Etke", Etke_);
-    writeEntry(os,"WFCmu", WFCmu_);
-    writeEntry(os,"CmuMax", CmuMax_);
-    writeEntry(os,"blendCoeff", blendCoeff_);
-    writeEntry(os,"zDir", zDir_);
-    writeEntry(os,"roughWall", roughWall_);
-    writeEntry(os,"thresholdU", thresholdU_);
-    writeEntry(os,"thresholdE", thresholdE_);
-    writeEntry(os,"thresholdK", thresholdK_);
-    writeEntry(os,"constantU", constantU_);
-    writeEntry(os,"constantE", constantE_);
-    writeEntry(os,"constantK", constantK_);
-}
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalarField& Foam::epsilonRoughABLFvPatchScalarField::G(bool init)
+scalarField& omegaRoughABLWallFunctionFvPatchScalarField::G(bool init)
 {
     if (patch().index() == master_)
     {
@@ -606,30 +627,27 @@ Foam::scalarField& Foam::epsilonRoughABLFvPatchScalarField::G(bool init)
         return G_;
     }
 
-    return epsilonPatch(master_).G();
+    return omegaPatch(master_).G();
 }
 
 
-Foam::scalarField& Foam::epsilonRoughABLFvPatchScalarField::epsilon
-(
-    bool init
-)
+scalarField& omegaRoughABLWallFunctionFvPatchScalarField::omega(bool init)
 {
     if (patch().index() == master_)
     {
         if (init)
         {
-            epsilon_ = 0.0;
+            omega_ = 0.0;
         }
 
-        return epsilon_;
+        return omega_;
     }
 
-    return epsilonPatch(master_).epsilon(init);
+    return omegaPatch(master_).omega(init);
 }
 
 
-void Foam::epsilonRoughABLFvPatchScalarField::updateCoeffs()
+void omegaRoughABLWallFunctionFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -650,13 +668,11 @@ void Foam::epsilonRoughABLFvPatchScalarField::updateCoeffs()
     if (patch().index() == master_)
     {
         createAveragingWeights();
-        calculateTurbulenceFields(turbModel, G(true), epsilon(true));
+        calculateTurbulenceFields(turbModel, G(true), omega(true));
     }
 
     const scalarField& G0 = this->G();
-    const scalarField& epsilon0 = this->epsilon();
-
-    typedef DimensionedField<scalar, volMesh> FieldType;
+    const scalarField& omega0 = this->omega();
 
     FieldType& G =
         const_cast<FieldType&>
@@ -664,21 +680,21 @@ void Foam::epsilonRoughABLFvPatchScalarField::updateCoeffs()
             db().lookupObject<FieldType>(turbModel.GName())
         );
 
-    FieldType& epsilon = const_cast<FieldType&>(internalField());
+    FieldType& omega = const_cast<FieldType&>(internalField());
 
     forAll(*this, facei)
     {
         label celli = patch().faceCells()[facei];
 
         G[celli] = G0[celli];
-        epsilon[celli] = epsilon0[celli];
+        omega[celli] = omega0[celli];
     }
 
     fvPatchField<scalar>::updateCoeffs();
 }
 
 
-void Foam::epsilonRoughABLFvPatchScalarField::updateWeightedCoeffs
+void omegaRoughABLWallFunctionFvPatchScalarField::updateWeightedCoeffs
 (
     const scalarField& weights
 )
@@ -702,13 +718,11 @@ void Foam::epsilonRoughABLFvPatchScalarField::updateWeightedCoeffs
     if (patch().index() == master_)
     {
         createAveragingWeights();
-        calculateTurbulenceFields(turbModel, G(true), epsilon(true));
+        calculateTurbulenceFields(turbModel, G(true), omega(true));
     }
 
     const scalarField& G0 = this->G();
-    const scalarField& epsilon0 = this->epsilon();
-
-    typedef DimensionedField<scalar, volMesh> FieldType;
+    const scalarField& omega0 = this->omega();
 
     FieldType& G =
         const_cast<FieldType&>
@@ -716,11 +730,11 @@ void Foam::epsilonRoughABLFvPatchScalarField::updateWeightedCoeffs
             db().lookupObject<FieldType>(turbModel.GName())
         );
 
-    FieldType& epsilon = const_cast<FieldType&>(internalField());
+    FieldType& omega = const_cast<FieldType&>(internalField());
 
-    scalarField& epsilonf = *this;
+    scalarField& omegaf = *this;
 
-    // Only set the values if the weights are > tolerance
+    // only set the values if the weights are > tolerance
     forAll(weights, facei)
     {
         scalar w = weights[facei];
@@ -730,8 +744,8 @@ void Foam::epsilonRoughABLFvPatchScalarField::updateWeightedCoeffs
             label celli = patch().faceCells()[facei];
 
             G[celli] = (1.0 - w)*G[celli] + w*G0[celli];
-            epsilon[celli] = (1.0 - w)*epsilon[celli] + w*epsilon0[celli];
-            epsilonf[facei] = epsilon[celli];
+            omega[celli] = (1.0 - w)*omega[celli] + w*omega0[celli];
+            omegaf[facei] = omega[celli];
         }
     }
 
@@ -739,7 +753,7 @@ void Foam::epsilonRoughABLFvPatchScalarField::updateWeightedCoeffs
 }
 
 
-void Foam::epsilonRoughABLFvPatchScalarField::manipulateMatrix
+void omegaRoughABLWallFunctionFvPatchScalarField::manipulateMatrix
 (
     fvMatrix<scalar>& matrix
 )
@@ -755,7 +769,7 @@ void Foam::epsilonRoughABLFvPatchScalarField::manipulateMatrix
 }
 
 
-void Foam::epsilonRoughABLFvPatchScalarField::manipulateMatrix
+void omegaRoughABLWallFunctionFvPatchScalarField::manipulateMatrix
 (
     fvMatrix<scalar>& matrix,
     const Field<scalar>& weights
@@ -767,10 +781,10 @@ void Foam::epsilonRoughABLFvPatchScalarField::manipulateMatrix
     }
 
     DynamicList<label> constraintCells(weights.size());
-    DynamicList<scalar> constraintEpsilon(weights.size());
+    DynamicList<scalar> constraintomega(weights.size());
     const labelUList& faceCells = patch().faceCells();
 
-    const DimensionedField<scalar, volMesh>& epsilon
+    const DimensionedField<scalar, volMesh>& omega
         = internalField();
 
     label nConstrainedCells = 0;
@@ -778,7 +792,7 @@ void Foam::epsilonRoughABLFvPatchScalarField::manipulateMatrix
 
     forAll(weights, facei)
     {
-        // Only set the values if the weights are > tolerance
+        // only set the values if the weights are > tolerance
         if (weights[facei] > tolerance_)
         {
             nConstrainedCells++;
@@ -786,11 +800,10 @@ void Foam::epsilonRoughABLFvPatchScalarField::manipulateMatrix
             label celli = faceCells[facei];
 
             constraintCells.append(celli);
-            constraintEpsilon.append(epsilon[celli]);
+            constraintomega.append(omega[celli]);
         }
     }
 
-    bool debug =1;
     if (debug)
     {
         Pout<< "Patch: " << patch().name()
@@ -802,23 +815,51 @@ void Foam::epsilonRoughABLFvPatchScalarField::manipulateMatrix
     matrix.setValues
     (
         constraintCells,
-        scalarField(constraintEpsilon)
+        scalarField(constraintomega)
     );
 
     fvPatchField<scalar>::manipulateMatrix(matrix);
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+void omegaRoughABLWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
-    makePatchTypeField
-    (
-        fvPatchScalarField,
-        epsilonRoughABLFvPatchScalarField
-    );
+    fixedValueFvPatchField<scalar>::write(os);
+    writeEntry(os,"z0", z0_);
+    writeEntry(os,"ustar", ustar_);
+    writeEntry(os,"kappaWF", kappaWF_);
+    writeEntry(os,"A", A_);
+    writeEntry(os,"B", B_);
+    writeEntry(os,"C", C_);
+    writeEntry(os,"D", D_);
+    writeEntry(os,"Etke", Etke_);
+    writeEntry(os,"WFbetaStar", WFbetaStar_);
+    writeEntry(os,"betaStarMax", betaStarMax_);
+    writeEntry(os,"blendCoeff", blendCoeff_);
+    writeEntry(os,"zDir", zDir_);
+    writeEntry(os,"roughWall", roughWall_);
+    writeEntry(os,"thresholdU", thresholdU_);
+    writeEntry(os,"thresholdO", thresholdO_);
+    writeEntry(os,"thresholdK", thresholdK_);
+    writeEntry(os,"constantU", constantU_);
+    writeEntry(os,"constantO", constantO_);
+    writeEntry(os,"constantK", constantK_);   
+    writeEntry(os, "beta1", beta1_);
+    writeEntry(os, "blended", blended_);
+    //fixedValueFvPatchField<scalar>::write(os);
 }
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+makePatchTypeField
+(
+    fvPatchScalarField,
+    omegaRoughABLWallFunctionFvPatchScalarField
+);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //
