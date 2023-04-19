@@ -307,7 +307,6 @@ void Foam::epsilonRoughABLFvPatchScalarField::calculate
             epsilon0[celli] +=
             w*Cmu75*pow(k[celli],1.5)/(kappaWF_[facei]*(y[facei]+z0_[facei]));
 
-        // Production of k - Original implementation in code from Leo, Parente
             G0[celli] +=
                 w
                *(0.52)*log((2*y[facei]+z0_[facei])/z0_[facei])*(nutw[facei] + nuw[facei])
@@ -315,7 +314,7 @@ void Foam::epsilonRoughABLFvPatchScalarField::calculate
                *Cmu25*sqrt(k[celli])
               /(kappaWF_[facei]*(y[facei] + z0_[facei]));
         
-        // Production of k (Parante 2011 Eq 24) - YA
+        // Production of k (Parante 2011 Eq 24)
             // G0[celli] +=
             // w
             // *pow((nutw[celli] + nuw[facei])
