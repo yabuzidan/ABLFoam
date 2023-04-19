@@ -14,6 +14,7 @@ Description
 start   (-4 0 0);
 end     (-4 0 500);
 fields  (U p k epsilon nut);
+// fields  (U p k omega nut);
 
 interpolationScheme cellPointFace; //cell; cellPoint; cellPointFace
 

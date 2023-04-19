@@ -28,13 +28,12 @@ boundaryField
     {
         type            EpsilonABL;
         #include        "include/ABLConditions"
+        value           $internalField;
     }
 
     outlet
     {
-        type            inletOutlet;
-        inletValue      uniform $turbulentEpsilon;
-        value           $internalField;
+        type            zeroGradient;
     }
 
     ground
@@ -44,19 +43,15 @@ boundaryField
 
         z0              uniform $z0;
         ustar           uniform $ustar;
-        kappaWF         uniform $kappaWF;
         
         A               uniform $A;
         B               uniform $B;
         C               uniform $C;
         D               uniform $D;
         Etke            uniform $E;
-
-        WFCmu           uniform $WFCmu;
         CmuMax          uniform $CmuMax;
         blendCoeff      uniform $blendCoeff;
         zDir            uniform $zDir;
-        roughWall       uniform $roughWall;
 
         thresholdU      uniform $thresholdU;
         thresholdE      uniform $thresholdE;
@@ -68,17 +63,21 @@ boundaryField
         constantK       uniform $constantK;
         constantO       uniform $constantO;
 
-        value           $internalField;
+        betaStarMax     uniform $betaStarMax;
+        WFbetaStar      uniform $WFbetaStar;
+
+        roughWall       uniform 1.0;
+        kappaWF         uniform $kappa;
+
+        E               9.793;
+        value           uniform 0;
     }
 
-    // building
-    // {
-    //     type            epsilonWallFunction;
-    //     Cmu             0.09;
-    //     kappa           0.4;
-    //     E               9.8;
-    //     value           $internalField;
-    // }
+    building
+    {
+        type            epsilonWallFunction;
+        value           uniform 1.125;
+    }
 
     #include "include/sideAndTopPatches"
 

@@ -31,7 +31,6 @@ boundaryField
     outlet
     {
         type            zeroGradient;
-        value           uniform 0;
     }
 
     ground
@@ -41,17 +40,16 @@ boundaryField
 
         z0              uniform $z0;
         ustar           uniform $ustar;
-        kappaWF         uniform $kappaWF;
         
         A               uniform $A;
         B               uniform $B;
         C               uniform $C;
         D               uniform $D;
         Etke            uniform $E;
+
         CmuMax          uniform $CmuMax;
         blendCoeff      uniform $blendCoeff;
         zDir            uniform $zDir;
-        roughWall       uniform $roughWall;
 
         thresholdU      uniform $thresholdU;
         thresholdE      uniform $thresholdE;
@@ -66,20 +64,23 @@ boundaryField
         betaStarMax     uniform $betaStarMax;
         WFbetaStar      uniform $WFbetaStar;
 
+        roughWall       uniform 1.0;
+        kappaWF         uniform $kappa;
+
         E               9.793;
         value           uniform 0;
     }
-    
-    // building
-    // {
-    //     type            nutkWallFunction;
-    //     Cmu             0.09;
-    //     kappa           0.4;
-    //     E               9.793;
-    //     value           uniform 0;
-    // }
+
+    building
+    {
+        type            nutkWallFunction;
+        Cmu             0.09;
+        kappa           0.4;
+        E               9.793;
+        value           uniform 0;
+    }
 
     #include "include/sideAndTopPatches"
-
+    
 }
 // ************************************************************************* //

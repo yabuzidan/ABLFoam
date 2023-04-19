@@ -7,11 +7,18 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Create mesh
 runApplication blockMesh
 
+# # Start residual monitor
+# { while [ -z "$(pidof $(getApplication) | head -n 1 | awk '{print $1}')" ]; do
+# 	sleep 5
+# done
+
+# until [ -z "$(pidof $(getApplication) | head -n 1 | awk '{print $1}')" ]; do
+# 	pkill -f gnuplot > /dev/null 2>&1
+# 	foamMonitor -l -r 1 -i 30 -t Residuals postProcessing/residuals/0/residuals.dat > /dev/null 2>&1 	
+# done } &
+
 # Run solver
 runApplication $(getApplication)
-
-# Calculate yPlus
-$(getApplication) -postProcess -func yPlus -noZero -latestTime > /dev/null 2>&1
 
 # Cleanup
 rm -rf processor* > /dev/null 2>&1
@@ -19,6 +26,3 @@ rm -rf dynamicCode  > /dev/null 2>&1
 
 # Run Post
 python3 post.py  # > /dev/null 2>&1
-
-# # Plot residuals
-# foamMonitor -l -t Residuals postProcessing/residuals/0/residuals.dat > /dev/null 2>&1 

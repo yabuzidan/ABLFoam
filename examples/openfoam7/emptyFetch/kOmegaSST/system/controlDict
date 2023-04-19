@@ -54,10 +54,9 @@ libs
 
 functions
 {
-  #includeFunc residuals
+  #includeFunc  residuals
   #includeFunc  inletGraph
   #includeFunc  incidentGraph
 }
-
 
 // ************************************************************************* //
