@@ -89,7 +89,7 @@ boundaryField
 
         #include        "include/ABLConditions"
         
-        zMax            1.0;
+        zMax            1.5;
         topEps #calc    "(pow($ustar,3) / ($kappa * ($zMax+$z0)))";
        
         value uniform $topEps;
