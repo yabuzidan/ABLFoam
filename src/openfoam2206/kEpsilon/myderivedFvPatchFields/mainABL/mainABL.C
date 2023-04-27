@@ -284,7 +284,7 @@ void Foam::mainABL::write(Ostream& os) const
     os.writeEntry("CmuMax", CmuMax_);
     os.writeEntry("z0", z0_) ;
     os.writeEntry("ustar", ustar_) ;
-    os.writeEntry("BM", BW_) ;
+    os.writeEntry("BW", BW_) ;
     os.writeEntry("hABL", hABL_) ;
 }
 
