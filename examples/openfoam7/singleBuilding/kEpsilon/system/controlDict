@@ -55,6 +55,7 @@ libs
 functions
 {
   #includeFunc  residuals
+  #includeFunc  probes
 }
 
 // ************************************************************************* //
