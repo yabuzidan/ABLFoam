@@ -49,7 +49,10 @@ boundaryField
         C               uniform $C;
         D               uniform $D;
         Etke            uniform $E;
+
         CmuMax          uniform $CmuMax;
+        WFCmu           uniform $WFCmu;
+
         blendCoeff      uniform $blendCoeff;
         zDir            uniform $zDir;
 
@@ -75,9 +78,6 @@ boundaryField
     building
     {
         type            omegaWallFunction;
-        Cmu             0.09;
-        kappa           0.4;
-        E               9.8;
         value           $internalField;
     }
 
