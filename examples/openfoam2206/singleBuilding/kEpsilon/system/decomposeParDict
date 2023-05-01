@@ -2,14 +2,31 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     | Website:  https://openfoam.org
-    \\  /    A nd           | Version:  8
+    \\  /    A nd           | Version:  7
      \\/     M anipulation  |
 \*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      decomposeParDict;
+}
 
-flowVelocity         (5 0 0);
-pressure             0;
-turbulentKE          0.6;
-turbulentEpsilon     1;
-turbulentOmega       1;
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+numberOfSubdomains 8;
+
+method          hierarchical;
+ 
+hierarchicalCoeffs
+{
+    n               (2 2 2);
+    delta           0.001;
+    order           xyz;
+}
+ 
+distributed     no;
+ 
 
 // ************************************************************************* //

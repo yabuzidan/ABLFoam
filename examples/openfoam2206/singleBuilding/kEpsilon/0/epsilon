@@ -50,8 +50,9 @@ boundaryField
         D               uniform $D;
         Etke            uniform $E;
 
-        WFCmu           uniform $WFCmu;
         CmuMax          uniform $CmuMax;
+        WFCmu           uniform $WFCmu;
+
         blendCoeff      uniform $blendCoeff;
         zDir            uniform $zDir;
 

@@ -7,8 +7,14 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Create mesh
 runApplication blockMesh
 
+# Decomponse mesh
+runApplication decomposePar -copyZero
+
 # Run solver
-runApplication $(getApplication)
+runParallel $(getApplication)
+
+# Reconstruct mesh
+runApplication reconstructPar
 
 # Postprocessing
 python3 tools/postProcess/probes_to_csv_U.py
