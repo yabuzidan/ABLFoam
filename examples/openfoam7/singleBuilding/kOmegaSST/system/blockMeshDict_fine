@@ -31,16 +31,36 @@ D      0.1;   //depth
 
 // Number of grid divisions on buidling
 
-nCell1   5;   // 0.5* streamwise (x) divisions (/2) on side faces of building
-nCell2   5;  // 0.5 * lateral (y) divisions on front and back faces of buidling
-nCell3   4;   // 0.5* veritcal (z) divisions (/2) along building height
+nCell1   10;   // 0.5* streamwise (x) divisions (/2) on side faces of building
+nCell2   15;  // 0.5 * lateral (y) divisions on front and back faces of buidling
+nCell3   10;   // 0.5* veritcal (z) divisions (/2) along building height
+
+// Grading of building
+grd3   1;                  // x grading building ups end
+grd4   #calc "1/$grd3";      // x grading building downstream end
+
+grd10   1;                 // y grading side1 of building
+grd11   #calc "1/$grd10";    // y grading side2 of building
+
+grd5   0.8;                 // z grading top of building
+grd6   #calc "1/$grd5";     // z grading bottom of building
+
 
 // Number of grid divisions of domain
 
-nCell4   10;  // x divisions upstream of building
-nCell5   15;  // x divisions downstream of building
-nCell6   10;  // lateral (y) divisions of domain either side of building
-nCell7   10;  // veritcal (z) divisions from buidling roof to top boundary of domain
+nCell4   20;  // x divisions upstream of building
+nCell5   50;  // x divisions downstream of building
+nCell6   20;  // lateral (y) divisions of domain either side of building
+nCell7   30;  // veritcal (z) divisions from buidling roof to top boundary of domain
+
+// Grading of domain
+grd1   0.02;  // x grading upstream domain
+grd2   50;   // x grading downstream domain
+
+grd8   0.04;               // y grading side1 of domain
+grd9   #calc "1/$grd8";    // y grading side2 of domain
+
+grd7   50;                // z grading top of domain
 
 
 Hdiv2 #calc "0.5*$H";
@@ -158,46 +178,46 @@ vertices
  
 blocks
 (
-  hex (0 1 6 5 20 21 26 25) ($nCell4 $nCell3 $nCell6) simpleGrading (0.2 5 0.2)
-  hex (1 2 7 6 21 22 27 26) ($nCell1 $nCell3 $nCell6) simpleGrading (5 5 0.2)
-  hex (2 3 8 7 22 23 28 27) ($nCell1 $nCell3 $nCell6) simpleGrading (0.4 5 0.2)
-  hex (3 4 9 8 23 24 29 28) ($nCell5 $nCell3 $nCell6) simpleGrading (10 5 0.2)
-  hex (5 6 11 10 25 26 31 30) ($nCell4 $nCell3 $nCell6) simpleGrading (0.2 0.4 0.2)
-  hex (6 7 12 11 26 27 32 31) ($nCell1 $nCell3 $nCell6) simpleGrading (5 0.4 0.2)
-  hex (7 8 13 12 27 28 33 32) ($nCell1 $nCell3 $nCell6) simpleGrading (0.4 0.4 0.2)
-  hex (8 9 14 13 28 29 34 33) ($nCell5 $nCell3 $nCell6) simpleGrading (10 0.4 0.2)
-  hex (10 11 16 15 30 31 36 35) ($nCell4 $nCell7 $nCell6) simpleGrading (0.2 40 0.2)
-  hex (11 12 17 16 31 32 37 36) ($nCell1 $nCell7 $nCell6) simpleGrading (5 40 0.2)
-  hex (12 13 18 17 32 33 38 37) ($nCell1 $nCell7 $nCell6) simpleGrading (0.4 40 0.2)
-  hex (13 14 19 18 33 34 39 38) ($nCell5 $nCell7 $nCell6) simpleGrading (10 40 0.2)
-  hex (20 21 26 25 40 41 46 45) ($nCell4 $nCell3 $nCell2) simpleGrading (0.2 5 5)
-  hex (23 24 29 28 43 44 49 48) ($nCell5 $nCell3 $nCell2) simpleGrading (10 5 5)
-  hex (25 26 31 30 45 46 51 50) ($nCell4 $nCell3 $nCell2) simpleGrading (0.2 0.4 5)
-  hex (28 29 34 33 48 49 54 53) ($nCell5 $nCell3 $nCell2) simpleGrading (10 0.4 5)
-  hex (30 31 36 35 50 51 56 55) ($nCell4 $nCell7 $nCell2) simpleGrading (0.2 40 5)
-  hex (31 32 37 36 51 52 57 56) ($nCell1 $nCell7 $nCell2) simpleGrading (5 40 5)
-  hex (32 33 38 37 52 53 58 57) ($nCell1 $nCell7 $nCell2) simpleGrading (0.4 40 5)
-  hex (33 34 39 38 53 54 59 58) ($nCell5 $nCell7 $nCell2) simpleGrading (10 40 5)
-  hex (40 41 46 45 60 61 66 65) ($nCell4 $nCell3 $nCell2) simpleGrading (0.2 5 0.4)
-  hex (43 44 49 48 63 64 69 68) ($nCell5 $nCell3 $nCell2) simpleGrading (10 5 0.4)
-  hex (45 46 51 50 65 66 71 70) ($nCell4 $nCell3 $nCell2) simpleGrading (0.2 0.4 0.4)
-  hex (48 49 54 53 68 69 74 73) ($nCell5 $nCell3 $nCell2) simpleGrading (10 0.4 0.4)
-  hex (50 51 56 55 70 71 76 75) ($nCell4 $nCell7 $nCell2) simpleGrading (0.2 40 0.4)
-  hex (51 52 57 56 71 72 77 76) ($nCell1 $nCell7 $nCell2) simpleGrading (5 40 0.4)
-  hex (52 53 58 57 72 73 78 77) ($nCell1 $nCell7 $nCell2) simpleGrading (0.4 40 0.4)
-  hex (53 54 59 58 73 74 79 78) ($nCell5 $nCell7 $nCell2) simpleGrading (10 40 0.4)
-  hex (60 61 66 65 80 81 86 85) ($nCell4 $nCell3 $nCell6) simpleGrading (0.2 5 40)
-  hex (61 62 67 66 81 82 87 86) ($nCell1 $nCell3 $nCell6) simpleGrading (5 5 40)
-  hex (62 63 68 67 82 83 88 87) ($nCell1 $nCell3 $nCell6) simpleGrading (0.4 5 40)
-  hex (63 64 69 68 83 84 89 88) ($nCell5 $nCell3 $nCell6) simpleGrading (10 5 40)
-  hex (65 66 71 70 85 86 91 90) ($nCell4 $nCell3 $nCell6) simpleGrading (0.2 0.4 40)
-  hex (66 67 72 71 86 87 92 91) ($nCell1 $nCell3 $nCell6) simpleGrading (5 0.4 40)
-  hex (67 68 73 72 87 88 93 92) ($nCell1 $nCell3 $nCell6) simpleGrading (0.4 0.4 40)
-  hex (68 69 74 73 88 89 94 93) ($nCell5 $nCell3 $nCell6) simpleGrading (10 0.4 40)
-  hex (70 71 76 75 90 91 96 95) ($nCell4 $nCell7 $nCell6) simpleGrading (0.2 40 40)
-  hex (71 72 77 76 91 92 97 96) ($nCell1 $nCell7 $nCell6) simpleGrading (5 40 40)
-  hex (72 73 78 77 92 93 98 97) ($nCell1 $nCell7 $nCell6) simpleGrading (0.4 40 40)
-  hex (73 74 79 78 93 94 99 98) ($nCell5 $nCell7 $nCell6) simpleGrading (10 40 40)
+  hex (0 1 6 5 20 21 26 25) ($nCell4 $nCell3 $nCell6) simpleGrading ($grd1 $grd6 $grd8)
+  hex (1 2 7 6 21 22 27 26) ($nCell1 $nCell3 $nCell6) simpleGrading ($grd4 $grd6 $grd8)
+  hex (2 3 8 7 22 23 28 27) ($nCell1 $nCell3 $nCell6) simpleGrading ($grd3 $grd6 $grd8)
+  hex (3 4 9 8 23 24 29 28) ($nCell5 $nCell3 $nCell6) simpleGrading ($grd2 $grd6 $grd8)
+  hex (5 6 11 10 25 26 31 30) ($nCell4 $nCell3 $nCell6) simpleGrading ($grd1 $grd5 $grd8)
+  hex (6 7 12 11 26 27 32 31) ($nCell1 $nCell3 $nCell6) simpleGrading ($grd4 $grd5 $grd8)
+  hex (7 8 13 12 27 28 33 32) ($nCell1 $nCell3 $nCell6) simpleGrading ($grd3 $grd5 $grd8)
+  hex (8 9 14 13 28 29 34 33) ($nCell5 $nCell3 $nCell6) simpleGrading ($grd2 $grd5 $grd8)
+  hex (10 11 16 15 30 31 36 35) ($nCell4 $nCell7 $nCell6) simpleGrading ($grd1 $grd7 $grd8)
+  hex (11 12 17 16 31 32 37 36) ($nCell1 $nCell7 $nCell6) simpleGrading ($grd4 $grd7 $grd8)
+  hex (12 13 18 17 32 33 38 37) ($nCell1 $nCell7 $nCell6) simpleGrading ($grd3 $grd7 $grd8)
+  hex (13 14 19 18 33 34 39 38) ($nCell5 $nCell7 $nCell6) simpleGrading ($grd2 $grd7 $grd8)
+  hex (20 21 26 25 40 41 46 45) ($nCell4 $nCell3 $nCell2) simpleGrading ($grd1 $grd6 $grd11)
+  hex (23 24 29 28 43 44 49 48) ($nCell5 $nCell3 $nCell2) simpleGrading ($grd2 $grd6 $grd11)
+  hex (25 26 31 30 45 46 51 50) ($nCell4 $nCell3 $nCell2) simpleGrading ($grd1 $grd5 $grd11)
+  hex (28 29 34 33 48 49 54 53) ($nCell5 $nCell3 $nCell2) simpleGrading ($grd2 $grd5 $grd11)
+  hex (30 31 36 35 50 51 56 55) ($nCell4 $nCell7 $nCell2) simpleGrading ($grd1 $grd7 $grd11)
+  hex (31 32 37 36 51 52 57 56) ($nCell1 $nCell7 $nCell2) simpleGrading ($grd4 $grd7 $grd11)
+  hex (32 33 38 37 52 53 58 57) ($nCell1 $nCell7 $nCell2) simpleGrading ($grd3 $grd7 $grd11)
+  hex (33 34 39 38 53 54 59 58) ($nCell5 $nCell7 $nCell2) simpleGrading ($grd2 $grd7 $grd11)
+  hex (40 41 46 45 60 61 66 65) ($nCell4 $nCell3 $nCell2) simpleGrading ($grd1 $grd6 $grd10)
+  hex (43 44 49 48 63 64 69 68) ($nCell5 $nCell3 $nCell2) simpleGrading ($grd2 $grd6 $grd10)
+  hex (45 46 51 50 65 66 71 70) ($nCell4 $nCell3 $nCell2) simpleGrading ($grd1 $grd5 $grd10)
+  hex (48 49 54 53 68 69 74 73) ($nCell5 $nCell3 $nCell2) simpleGrading ($grd2 $grd5 $grd10)
+  hex (50 51 56 55 70 71 76 75) ($nCell4 $nCell7 $nCell2) simpleGrading ($grd1 $grd7 $grd10)
+  hex (51 52 57 56 71 72 77 76) ($nCell1 $nCell7 $nCell2) simpleGrading ($grd4 $grd7 $grd10)
+  hex (52 53 58 57 72 73 78 77) ($nCell1 $nCell7 $nCell2) simpleGrading ($grd3 $grd7 $grd10)
+  hex (53 54 59 58 73 74 79 78) ($nCell5 $nCell7 $nCell2) simpleGrading ($grd2 $grd7 $grd10)
+  hex (60 61 66 65 80 81 86 85) ($nCell4 $nCell3 $nCell6) simpleGrading ($grd1 $grd6 $grd9)
+  hex (61 62 67 66 81 82 87 86) ($nCell1 $nCell3 $nCell6) simpleGrading ($grd4 $grd6 $grd9)
+  hex (62 63 68 67 82 83 88 87) ($nCell1 $nCell3 $nCell6) simpleGrading ($grd3 $grd6 $grd9)
+  hex (63 64 69 68 83 84 89 88) ($nCell5 $nCell3 $nCell6) simpleGrading ($grd2 $grd6 $grd9)
+  hex (65 66 71 70 85 86 91 90) ($nCell4 $nCell3 $nCell6) simpleGrading ($grd1 $grd5 $grd9)
+  hex (66 67 72 71 86 87 92 91) ($nCell1 $nCell3 $nCell6) simpleGrading ($grd4 $grd5 $grd9)
+  hex (67 68 73 72 87 88 93 92) ($nCell1 $nCell3 $nCell6) simpleGrading ($grd3 $grd5 $grd9)
+  hex (68 69 74 73 88 89 94 93) ($nCell5 $nCell3 $nCell6) simpleGrading ($grd2 $grd5 $grd9)
+  hex (70 71 76 75 90 91 96 95) ($nCell4 $nCell7 $nCell6) simpleGrading ($grd1 $grd7 $grd9)
+  hex (71 72 77 76 91 92 97 96) ($nCell1 $nCell7 $nCell6) simpleGrading ($grd4 $grd7 $grd9)
+  hex (72 73 78 77 92 93 98 97) ($nCell1 $nCell7 $nCell6) simpleGrading ($grd3 $grd7 $grd9)
+  hex (73 74 79 78 93 94 99 98) ($nCell5 $nCell7 $nCell6) simpleGrading ($grd2 $grd7 $grd9)
 );
  
 edges

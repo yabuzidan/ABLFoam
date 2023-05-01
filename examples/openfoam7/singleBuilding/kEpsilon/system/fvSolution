@@ -25,7 +25,7 @@ solvers
 
         smoother        GaussSeidel;
 
-        nCellsInCoarsestLevel 600;
+        nCellsInCoarsestLevel 100;
     }
 
     "(U|k|epsilon|omega|nut)"
@@ -43,7 +43,7 @@ SIMPLE
 
     residualControl
     {
-        "(p|U|k|epsilon|omega|nut)" 1e-3;
+        "(p|U|k|epsilon|omega|nut)" 1e-5;
     }
 }
 
