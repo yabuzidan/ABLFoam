@@ -36,13 +36,13 @@ nCell2   10;  // 0.5 * lateral (y) divisions on front and back faces of buidling
 nCell3   10;   // 0.5* veritcal (z) divisions (/2) along building height
 
 // Grading of building
-grd3   0.2;                  // x grading building ups end
+grd3   0.5;                  // x grading building ups end
 grd4   #calc "1/$grd3";      // x grading building downstream end
 
-grd10   0.2;                 // y grading side1 of building
+grd10   0.5;                 // y grading side1 of building
 grd11   #calc "1/$grd10";    // y grading side2 of building
 
-grd5   0.2;                 // z grading top of building
+grd5   0.5;                 // z grading top of building
 grd6   #calc "1/$grd5";     // z grading bottom of building
 
 
@@ -54,13 +54,13 @@ nCell6   20;  // lateral (y) divisions of domain either side of building
 nCell7   30;  // veritcal (z) divisions from buidling roof to top boundary of domain
 
 // Grading of domain
-grd1   0.01;  // x grading upstream domain
-grd2   150;   // x grading downstream domain
+grd1   0.02;  // x grading upstream domain
+grd2   50;   // x grading downstream domain
 
 grd8   0.02;               // y grading side1 of domain
 grd9   #calc "1/$grd8";    // y grading side2 of domain
 
-grd7   100;                // z grading top of domain
+grd7   50;                // z grading top of domain
 
 
 Hdiv2 #calc "0.5*$H";
