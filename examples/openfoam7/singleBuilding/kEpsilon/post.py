@@ -30,8 +30,8 @@ df_U = pd.DataFrame([])
 probelist = df_uvw.index.get_level_values(0).unique()
 
 for probe in probelist:
-    df_U[probe] = np.array([np.sqrt(df_uvw[probe]['U']**2 + df_uvw[probe]['V']**2 + df_uvw[probe]['W']**2)/Uref])
-    # df_U[probe] = np.array([df_uvw[probe]['U']])
+    # df_U[probe] = np.array([np.sqrt(df_uvw[probe]['U']**2 + df_uvw[probe]['V']**2 + df_uvw[probe]['W']**2)/Uref])
+    df_U[probe] = np.array([df_uvw[probe]['U']/Uref])
 
 df_U = df_U.T.values
 
