@@ -67,7 +67,7 @@ ABLkOmegaSST<BasicTurbulenceModel>::ABLkOmegaSST
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "BetaStarMax",
+            "betaStarMax",
             this->coeffDict_,
             0.15
         )
