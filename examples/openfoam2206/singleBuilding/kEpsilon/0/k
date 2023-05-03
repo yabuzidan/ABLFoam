@@ -43,9 +43,9 @@ boundaryField
 
     building
     {
-        type            kqRWallFunction;
-        value           uniform 0.357075;
+        type            zeroGradient;
     }
+
 
     #include "include/sideAndTopPatches"
 
