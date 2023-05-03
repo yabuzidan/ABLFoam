@@ -48,8 +48,8 @@ runTimeModifiable true;
 libs
 (
   // "myLibABL.so"                      //kEpsilon
-  // "myLibABLkOmegaSST.so"             //kOmegaSST
-  "myLibABLkOmegaSST_diffblend.so"   //kOmegaSST_F1blend
+  "myLibABLkOmegaSST.so"             //kOmegaSST
+  // "myLibABLkOmegaSST_diffblend.so"   //kOmegaSST_F1blend
  );
 
 functions
