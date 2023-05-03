@@ -69,7 +69,7 @@ boundaryField
         betaStarMax     uniform $betaStarMax;
         WFbetaStar      uniform $WFbetaStar;
 
-        roughWall       uniform 1.0;
+        roughWall       uniform 1;
         kappaWF         uniform $kappa;
 
         E               9.793;
