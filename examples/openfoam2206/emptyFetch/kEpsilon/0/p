@@ -40,11 +40,6 @@ boundaryField
         type            zeroGradient;
     }
     
-    building      
-    {
-        type            zeroGradient;
-    }
-
     #include "include/sideAndTopPatches"
 
 }

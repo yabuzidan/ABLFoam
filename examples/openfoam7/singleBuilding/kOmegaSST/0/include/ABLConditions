@@ -39,7 +39,7 @@ hABL            1;        // TKE profile parameter, used when BW is selected
 // For sinosodial blending, larger blending coefficient (i.e. alpha) results in a sharper detection of the BIA.
 // maximum extension reached with alpha = 32.
 // See Longo et al (2017)
-blendCoeff      32;      // Blending coefficient "alpha" in Eq.22 Bellegoni et al (2023). Values e.g.: 1, 4, 32
+blendCoeff      1;       // Blending coefficient "alpha" in Eq.22 Bellegoni et al (2023). Values e.g.: 1, 4, 32
 
 // Turbulence model constants upper limit
 CmuMax          0.35;     // Upper limit for Cmu in undistrubed flow (kEpsilon)

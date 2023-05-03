@@ -69,16 +69,6 @@ boundaryField
 
         E               9.793;
         value           uniform 0;
-    }
-
-    building
-    {
-        type            nutkWallFunction;
-        Cmu             0.09;
-        kappa           0.4;
-        E               9.793;
-        value           uniform 0;
-    }
 
     #include "include/sideAndTopPatches"
     

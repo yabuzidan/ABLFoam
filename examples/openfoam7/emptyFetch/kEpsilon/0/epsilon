@@ -76,12 +76,6 @@ boundaryField
         value           uniform 0;
     }
 
-    building
-    {
-        type            epsilonWallFunction;
-        value           uniform 1.125;
-    }
-
     #include "include/sideAndTopPatches"
 
     top
