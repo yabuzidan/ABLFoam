@@ -49,10 +49,10 @@ SIMPLE
 
 relaxationFactors
 {
-    p               0.2;
-    U               0.5;
-    k               0.5;
-    epsilon         0.5;
+    p               0.5;
+    U               0.7;
+    k               0.9;
+    epsilon         0.7;
     omega           0.5;
     nut             0.5;
 }
