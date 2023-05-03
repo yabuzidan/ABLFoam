@@ -220,8 +220,8 @@ tmp<volScalarField> ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::nonline
     //volScalarField St = (this->k_/epsilon())*sqrt(2.0)*mag(S);   //original
     //volScalarField Ot = (this->k_/epsilon())*sqrt(2.0)*mag(W);   //original
 
-    volScalarField St = (1/(blendbetaStar_*this->omega_))*sqrt(2.0)*mag(S);   //original
-    volScalarField Ot = (1/(blendbetaStar_*this->omega_))*sqrt(2.0)*mag(W);   //original
+    volScalarField St = (1/max(blendbetaStar_*this->omega_, blendsmall))*sqrt(2.0)*mag(S);   //original
+    volScalarField Ot = (1/max(blendbetaStar_*this->omega_, blendsmall))*sqrt(2.0)*mag(W);   //original
 
     return min((1/(0.9*pow(St,1.4)+0.4*pow(Ot,1.4)+3.5)),0.15);
 }
@@ -906,7 +906,8 @@ ABLkOmegaSST<TurbulenceModel, BasicTurbulenceModel>::ABLkOmegaSST
     usmall("usmall",dimensionSet(0,1,-1,0,0,0,0),scalar(1e-10)),
     ksmall("ksmall",dimensionSet(0,2,-2,0,0,0,0),scalar(1e-10)),
     osmall("esmall",dimensionSet(0,0,-1,0,0,0,0),scalar(1e-10)),
-    
+    blendsmall("blendsmall",dimensionSet(0,0,-1,0,0,0,0),scalar(1e-10)),
+
     NLbetaStar_
     (
         IOobject

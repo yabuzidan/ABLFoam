@@ -180,6 +180,7 @@ protected:
         dimensionedScalar usmall;
         dimensionedScalar ksmall;
         dimensionedScalar osmall;
+        dimensionedScalar blendsmall;
     
         volScalarField NLbetaStar_;
         volScalarField hombetaStar_;
