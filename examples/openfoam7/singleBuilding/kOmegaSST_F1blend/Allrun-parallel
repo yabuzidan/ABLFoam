@@ -1,0 +1,38 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# Create mesh
+runApplication blockMesh
+
+# Decomponse mesh
+runApplication decomposePar -copyZero
+
+# Start residual monitor
+{ while [ -z "$(pidof $(getApplication) | head -n 1 | awk '{print $1}')" ]; do
+	sleep 5
+done
+
+until [ -z "$(pidof $(getApplication) | head -n 1 | awk '{print $1}')" ]; do
+	pkill -f gnuplot > /dev/null 2>&1
+	foamMonitor -l -r 1 -i 30 -t Residuals postProcessing/residuals/0/residuals.dat > /dev/null 2>&1 	
+done } &
+
+# Run solver
+runParallel $(getApplication)
+
+# Reconstruct mesh
+runApplication reconstructPar
+
+# Postprocessing
+python3 tools/postProcess/probes_to_csv_U.py
+python3 tools/postProcess/probes_to_csv_k.py
+
+# Cleanup
+rm -rf processor* > /dev/null 2>&1
+rm -rf dynamicCode  > /dev/null 2>&1
+
+# Run Post
+python3 post.py  # > /dev/null 2>&1

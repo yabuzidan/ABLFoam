@@ -1,0 +1,18 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# Create mesh
+runApplication blockMesh
+
+# Run solver
+runApplication $(getApplication)
+
+# Cleanup
+rm -rf processor* > /dev/null 2>&1
+rm -rf dynamicCode  > /dev/null 2>&1
+
+# Run Post
+python3 post.py  # > /dev/null 2>&1
