@@ -19,17 +19,20 @@ ustar               #calc "$Uref*$kappa / log(($Zref+$z0) / $z0)";
 // ************************************************************************* //
 
 // Curve-fitting coefficients for TKE profile
-
 // A*log((z + z0)/z0) + B*sqr((z + z0)/z0) + C(z + z0)/z0)+ D + E*log(z + z0)
+// NOTE: For a non-dimensional TKE profile (i.e. not affected by geometric scale), avoid using E coefficient.
 
-A               0;
+// Profile in Bellegoni et al 2023: A=B=C=0, D=0.52, E=-0.04
+// A non-dimensional equivalent profile to Bellegoni: A=-0.04, D=0.807, B=C=E=0 
+
+A               -0.04;
 B               0;
 C               0;
-D               0.52;     //C2 in Bellegoni
-E               -0.04;    //C1 in Bellegoni
+D               0.807;
+E               0;
 
 // Alternative TKE profile
-BW              0;        // Flag for alternative TKE profile
+BW              0;        // Flag for alternative TKE profile. 0: disabled
 hABL            1;        // TKE profile parameter, used when BW is selected
 
 // ************************************************************************* //
@@ -38,7 +41,7 @@ hABL            1;        // TKE profile parameter, used when BW is selected
 // For sinosodial blending, larger blending coefficient (i.e. alpha) results in a sharper detection of the BIA.
 // maximum extension reached with alpha = 32.
 // See Longo et al (2017)
-blendCoeff      1;       // Blending coefficient "alpha" in Eq.22 Bellegoni et al (2023). Values e.g.: 1, 4, 32
+blendCoeff      1;        // Blending coefficient "alpha" in Eq.22 Bellegoni et al (2023). Values e.g.: 1, 4, 32
 
 // Turbulence model constants upper limit
 CmuMax          0.35;     // Upper limit for Cmu in undistrubed flow (kEpsilon)
