@@ -82,8 +82,8 @@ boundaryField
     {
         type fixedValue;
 
+        #include        "$FOAM_CASE/system/blockMeshDict"
         #include        "include/ABLConditions"
-        #include        "../system/blockMeshDict"
 
         topEps #calc    "(pow($ustar,3) / ($kappa * ($zMax+$z0)))";
        

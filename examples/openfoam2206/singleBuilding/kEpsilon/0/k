@@ -53,9 +53,9 @@ boundaryField
     {
         type fixedValue;
 
+        #include        "$FOAM_CASE/system/blockMeshDict"
         #include        "include/ABLConditions"
         
-        zMax            1.5;
         topK #calc      "$A*log(($zMax + $z0)/$z0) + $B*sqr(($zMax + $z0)/$z0) + $C*(($zMax + $z0)/$z0)+ $D +$E*log($zMax + $z0)";
        
         value uniform $topK;
