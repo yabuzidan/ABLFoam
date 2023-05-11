@@ -20,7 +20,7 @@ ustar               #calc "$Uref*$kappa / log(($Zref+$z0) / $z0)";
 
 // Curve-fitting coefficients for TKE profile
 
-// A*log((z + z0)/z) + B*sqr((z + z0)/z0) + C(z + z0)/z0)+ D + E*log(z + z0)
+// A*log((z + z0)/z0) + B*sqr((z + z0)/z0) + C(z + z0)/z0)+ D + E*log(z + z0)
 // Note: If Zmax is large, code may fail due to negative value under sqrt
 
 A               0;
