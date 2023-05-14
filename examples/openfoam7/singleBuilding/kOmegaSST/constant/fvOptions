@@ -14,14 +14,14 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-limitU
-{
-    type            limitVelocity;
-    active          yes;
+// limitU
+// {
+//     type            limitVelocity;
+//     active          yes;
 
-    selectionMode   all;
-    max             100;
-}
+//     selectionMode   all;
+//     max             100;
+// }
 
 
 // ************************************************************************* //
