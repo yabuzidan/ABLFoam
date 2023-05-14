@@ -59,7 +59,6 @@ tmp<scalarField> NutRoughABLWallFunctionFvPatchScalarField::calcNut() const
             internalField().group()
         )
     );
-
     const scalarField& y = turbModel.y()[patchi];
     const tmp<scalarField> tnuw = turbModel.nu(patchi);
     const scalarField& nuw = tnuw();
@@ -167,11 +166,20 @@ tmp<scalarField> NutRoughABLWallFunctionFvPatchScalarField::calcNut() const
         
         if(roughWall_[facei] > 0) // Rough case
         {
-            scalar yPlus = uStar*(y[facei]+z0_[facei])/nuw[facei];
-            scalar Edash = nuw[facei]/(z0_[facei]*uStar);
-            nutw[facei] =
-            nuw[facei]*(yPlus*kappaWF_[facei]/log(Edash*yPlus) - 1);
-            
+            // Original implementaiton from Leo/Parante code (not working)
+            // scalar yPlus = uStar*(y[facei]+z0_[facei])/nuw[facei];
+            // scalar Edash = nuw[facei]/(z0_[facei]*uStar);
+
+            // nutw[facei] =
+            // nuw[facei]*(yPlus*kappaWF_[facei]/log(Edash*yPlus) - 1);
+
+
+            // YA - based on OF2206 impelmentation atmNutkWallFunction
+            scalar yPlus = uStar*y[facei]/nuw[facei];
+            scalar Edash = (y[facei] + z0_[facei])/z0_[facei];
+
+            nutw[facei] = nuw[facei]*(yPlus*kappaWF_[facei]/log(max(Edash, 1 + 1e-4)) - 1);
+
             if (debug)
             {
                 Info<< "yPlus = " << yPlus
@@ -184,9 +192,26 @@ tmp<scalarField> NutRoughABLWallFunctionFvPatchScalarField::calcNut() const
         {
             scalar yPlus = uStar*y[facei]/nuw[facei];
             scalar Edash = wallCoeffs_.E();//E_; for openfoam2112
-            nutw[facei] =
-            nuw[facei]*(yPlus*kappaWF_[facei]/log(Edash*yPlus) - 1);
             
+            // // Original implementaiton from Leo/Parante code
+            // nutw[facei] =
+            // nuw[facei]*(yPlus*kappaWF_[facei]/log(Edash*yPlus) - 1);
+            
+            // YA - based on OF2206 impelmentation nutkRoughWallFunction (improved stability)
+            const scalar limitingNutw = max(nutw[facei], nuw[facei]);
+            // To avoid oscillations limit the change in the wall viscosity
+            // which is particularly important if it temporarily becomes zero
+            nutw[facei] =
+                max
+                (
+                    min
+                    (
+                        nuw[facei]
+                        *(yPlus*kappaWF_[facei]/log(max(Edash*yPlus, 1 + 1e-4)) - 1),
+                        2*limitingNutw
+                    ), 0.5*limitingNutw
+                );
+
             if (debug)
             {
                 Info<< "yPlus = " << yPlus

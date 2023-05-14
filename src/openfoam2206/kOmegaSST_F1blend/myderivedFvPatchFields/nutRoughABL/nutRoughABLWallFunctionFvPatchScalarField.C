@@ -89,7 +89,7 @@ tmp<scalarField> NutRoughABLWallFunctionFvPatchScalarField::calcNut() const
     const scalarField kref = A_*log(coord) + B_*sqr(coord) + C_*(coord)+ D_ +Etke_*log(coord2);
     const scalarField hombetaStar = min(pow(ustar_,4)/sqr(kref),betaStarMax_);
     const scalarField oref = (ustar_/sqrt(hombetaStar))/(kappaWF_*coord2);
-    
+
     // Calculate errors
     const fvPatchVectorField& Uw = turbModel.U().boundaryField()[patchi];
     const volVectorField& Ut = turbModel.U();
@@ -144,13 +144,10 @@ tmp<scalarField> NutRoughABLWallFunctionFvPatchScalarField::calcNut() const
     }
 
     scalarField herr = max(max(Uerr,kerr),Oerr);
-    
-    
+       
     forAll(nutw, facei)
     {
         label celli = patch().faceCells()[facei];
-        
-        
         
         const scalar betaStar25 = pow025(hombetaStar[facei]);
 
@@ -158,11 +155,20 @@ tmp<scalarField> NutRoughABLWallFunctionFvPatchScalarField::calcNut() const
         
         if(roughWall_[facei] > 0) // Rough case
         {
-            scalar yPlus = uStar*(y[facei]+z0_[facei])/nuw[facei];
-            scalar Edash = nuw[facei]/(z0_[facei]*uStar);
-            nutw[facei] =
-            nuw[facei]*(yPlus*kappaWF_[facei]/log(Edash*yPlus) - 1);
-            
+            // Original implementaiton from Leo/Parante code (not working)
+            // scalar yPlus = uStar*(y[facei]+z0_[facei])/nuw[facei];
+            // scalar Edash = nuw[facei]/(z0_[facei]*uStar);
+
+            // nutw[facei] =
+            // nuw[facei]*(yPlus*kappaWF_[facei]/log(Edash*yPlus) - 1);
+
+
+            // YA - based on OF2206 impelmentation atmNutkWallFunction
+            scalar yPlus = uStar*y[facei]/nuw[facei];
+            scalar Edash = (y[facei] + z0_[facei])/z0_[facei];
+
+            nutw[facei] = nuw[facei]*(yPlus*kappaWF_[facei]/log(max(Edash, 1 + 1e-4)) - 1);
+
             if (debug)
             {
                 Info<< "yPlus = " << yPlus
@@ -175,9 +181,26 @@ tmp<scalarField> NutRoughABLWallFunctionFvPatchScalarField::calcNut() const
         {
             scalar yPlus = uStar*y[facei]/nuw[facei];
             scalar Edash = wallCoeffs_.E();//E_; for openfoam2112
-            nutw[facei] =
-            nuw[facei]*(yPlus*kappaWF_[facei]/log(Edash*yPlus) - 1);
             
+            // // Original implementaiton from Leo/Parante code
+            // nutw[facei] =
+            // nuw[facei]*(yPlus*kappaWF_[facei]/log(Edash*yPlus) - 1);
+            
+            // YA - based on OF2206 impelmentation nutkRoughWallFunction (improved stability)
+            const scalar limitingNutw = max(nutw[facei], nuw[facei]);
+            // To avoid oscillations limit the change in the wall viscosity
+            // which is particularly important if it temporarily becomes zero
+            nutw[facei] =
+                max
+                (
+                    min
+                    (
+                        nuw[facei]
+                        *(yPlus*kappaWF_[facei]/log(max(Edash*yPlus, 1 + 1e-4)) - 1),
+                        2*limitingNutw
+                    ), 0.5*limitingNutw
+                );
+
             if (debug)
             {
                 Info<< "yPlus = " << yPlus

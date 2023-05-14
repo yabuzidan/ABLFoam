@@ -307,20 +307,43 @@ void Foam::epsilonRoughABLFvPatchScalarField::calculate
             epsilon0[celli] +=
             w*Cmu75*pow(k[celli],1.5)/(kappaWF_[facei]*(y[facei]+z0_[facei]));
 
+            // Original implementaiton from Leo/Parante code (not working)
+            // G0[celli] +=
+            //     w
+            //    *(0.52)*log((2*y[facei]+z0_[facei])/z0_[facei])*(nutw[facei] + nuw[facei])
+            //    *magGradUw[facei]
+            //    *Cmu25*sqrt(k[celli])
+            //   /(kappaWF_[facei]*(y[facei] + z0_[facei]));
+        
+            // // YA - Production of k based on Parante 2011 Eq 24
+            // G0[celli] +=
+            //     w
+            //     *pow((nutw[celli] + nuw[facei])
+            //     *magGradUw[celli],2)
+            //     /(Cmu25*sqrt(k[celli])
+            //     *kappaWF_[facei]*(y[facei] + z0_[facei]));
+            
+            // YA - based on OF2206 impelmentation atmEpsilonWallFunction (same as above)
             G0[celli] +=
                 w
-               *(0.52)*log((2*y[facei]+z0_[facei])/z0_[facei])*(nutw[facei] + nuw[facei])
-               *magGradUw[facei]
-               *Cmu25*sqrt(k[celli])
-              /(kappaWF_[facei]*(y[facei] + z0_[facei]));
-        
-        // Production of k (Parante 2011 Eq 24)
+                *(nutw[facei] + nuw[facei])
+                *magGradUw[facei]
+                *Cmu25*sqrt(k[celli])
+                /(kappaWF_[facei]*(y[facei] + z0_[facei]));
+
+            // NOTE: Above expression for G0 results in very slight inhomogeniety at near wall cell that
+            // can be eliminated by multiplying with an appropriate scaling factor (e.g. 1.26317*w*....).
+            // TODO: derive an expression for scaling factor. Factor is dependent of ustar, k, y, z0 near the wall (among possibly others)
+
+            // // YA - alternative definition of magGradUw (dU/dy)
+            // const scalar dUdivdz = Cmu25*sqrt(k[celli])*log((y[facei] + z0_[facei])/z0_[facei])/(y[facei]*kappaWF_[facei]);
             // G0[celli] +=
-            // w
-            // *pow((nutw[celli] + nuw[facei])
-            // *magGradUw[celli],2)
-            // /(Cmu25*sqrt(k[celli])
-            // *kappaWF_[facei]*(y[facei] + z0_[facei]));
+            //     w
+            //     *(nutw[facei] + nuw[facei])
+            //     *dUdivdz
+            //     *Cmu25*sqrt(k[celli])
+            //     /(kappaWF_[facei]*(y[facei] + z0_[facei]));
+
         }
         else
         {
