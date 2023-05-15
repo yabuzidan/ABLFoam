@@ -54,10 +54,10 @@ WFbetaStar      0.09;    // kOmegaSST
 // ************************************************************************* //
 
 // Threshold/minimum deviation of U, k, epsilon, omega (%) to detect distrubed region
-thresholdU      0.05;
-thresholdK      0.3;
-thresholdE      0.1;
-thresholdO      0.1;
+thresholdU      0.0;
+thresholdK      0.0;
+thresholdE      0.0;
+thresholdO      0.0;
 
 // Attenuation parameters to avoid over-extending of disturbed region (Building Influence Area).
 // =1/A in Eq. 23 of Bellegoni et al (2023)
