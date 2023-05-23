@@ -23,6 +23,7 @@ processor*
 # logfiles
 log.*
 *log
+logs/
 
 # paraview/ParaFoam
 *.foam
