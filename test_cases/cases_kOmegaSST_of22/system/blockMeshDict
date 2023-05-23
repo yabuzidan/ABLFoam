@@ -20,12 +20,20 @@ FoamFile
     yMin   -5;
     yMax   5;
     zMin   0;
-    zMax   300;
+
+    zMax   300; // case 1
+    // zMax   450; // case 2
+    // zMax   600; // case 3
+    // zMax   800; // case 4
 
     // Cell divisions in each direction
-    xCells  100;
-    yCells  1;
-    zCells  94;
+    xCells  100; //1000
+    yCells  1;   //10
+
+    zCells  94; // case 1
+    // zCells  141; // case 2
+    // zCells  189; // case 3
+    // zCells  252; // case 4
 
 convertToMeters 1;
 
