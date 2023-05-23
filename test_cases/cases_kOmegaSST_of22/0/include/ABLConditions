@@ -55,7 +55,7 @@ WFbetaStar      0.09;    // kOmegaSST
 
 // Threshold/minimum deviation of U, k, epsilon, omega (%) to detect distrubed region
 thresholdU      0.05;
-thresholdK      0.3;
+thresholdK      0.1;
 thresholdE      0.1;
 thresholdO      0.1;
 

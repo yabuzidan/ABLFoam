@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     | Website:  https://openfoam.org
@@ -10,30 +10,43 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-    p
+    p                                  // linear equation system solver for p
     {
-        solver          GAMG;
-        tolerance       1e-9;
-        relTol          0.001;
-
-        smoother        GaussSeidel;
-
-        nCellsInCoarsestLevel 100;
+        solver          GAMG;           // very efficient multigrid solver
+        tolerance       1e-09;          // solver finishes if either absolute
+        relTol          0.001;          // tolerance is reached or the relative
+                                        // tolerance here
+        minIter         3;              // a minimum number of iterations
+        maxIter         100;            // limitation of iterions number
+        smoother        DIC;            // setting for GAMG
+        nPreSweeps      1;              // 1 for p, set to 0 for all other!
+        nPostSweeps     2;              // 2 is fine
+        nFinestSweeps   2;              // 2 is fine
+        scaleCorrection true;           // true is fine
+        directSolveCoarsestLevel false; // false is fine
+        cacheAgglomeration on;          // on is fine; set to off, if dynamic
+                                        // mesh refinement is used!
+        nCellsInCoarsestLevel 500;      // 500 is fine,
+                                        // otherwise sqrt(number of cells)
+        agglomerator    faceAreaPair;   // faceAreaPair is fine
+        mergeLevels     1;              // 1 is fine
     }
 
     "(U|k|epsilon|omega|nut)"
     {
-        solver          smoothSolver; 
-        smoother        GaussSeidel;
-        tolerance       1e-9; 
-        relTol          0.001;
+        solver          smoothSolver;   // solver type
+        smoother        GaussSeidel;    // smoother type
+        tolerance       1e-09;          // solver finishes if either absolute
+        relTol          0.001;           // tolerance is reached or the relative
+                                        // tolerance here
+        nSweeps         1;              // setting for smoothSolver
+        maxIter         100;            // limitation of iterations number
     }
 }
 
@@ -43,18 +56,18 @@ SIMPLE
 
     residualControl
     {
-        "(p|U|k|epsilon|omega|nut)" 1e-5;
+        p               1e-4;
+        "(U|k|epsilon|omega|nut)" 1e-5;
     }
 }
 
 relaxationFactors
 {
     p               0.3;
-    U               0.5;
+    U               0.7;
     k               0.7;
     epsilon         0.7;
-    omega           0.5;
-    nut             0.5;
+    omega           0.7;
 }
 
 

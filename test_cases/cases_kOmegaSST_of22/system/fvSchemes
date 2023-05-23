@@ -10,7 +10,6 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -39,7 +38,7 @@ divSchemes
 
 laplacianSchemes
 {
-    default         Gauss linear corrected;
+    default             Gauss linear limited corrected 0.5;
 }
 
 interpolationSchemes
@@ -49,14 +48,13 @@ interpolationSchemes
 
 snGradSchemes
 {
-    default         corrected;
+    default             limited corrected 0.5;
 }
 
 wallDist
 {
     method meshWave;
 }
-
 
 
 // ************************************************************************* //
