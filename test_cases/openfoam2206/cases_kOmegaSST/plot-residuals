@@ -4,26 +4,6 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-# Create mesh
-runApplication blockMesh
-
-# Decomponse mesh
-runApplication decomposePar -copyZero
-
-# Run solver
-runParallel $(getApplication)
-
-# Reconstruct mesh
-runApplication reconstructPar
-
-# Cleanup
-rm -rf processor* > /dev/null 2>&1
-rm -rf dynamicCode  > /dev/null 2>&1
-
-# Run Post
-python3 post.py  # > /dev/null 2>&1
-python3 post1.py  # > /dev/null 2>&1
-
 # Plot residuals
 foamLog log.$(getApplication)
 
@@ -34,9 +14,7 @@ gnuplot << EOF
     set logscale y
     plot './logs/p_0' with lines, \
         './logs/Ux_0' with lines, \
-        './logs/Uy_0' with lines, \
         './logs/Uz_0' with lines, \
         './logs/k_0' with lines, \
-        './logs/epsilon_0' with lines, \
         './logs/omega_0' with lines
 EOF

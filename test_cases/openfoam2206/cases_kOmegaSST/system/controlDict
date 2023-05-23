@@ -55,6 +55,13 @@ libs
 functions
 {
   #include  "sampleLines"
+
+  residuals
+  {
+      type            solverInfo;
+      libs            (utilityFunctionObjects);
+      fields          (".*");
+  }
 }
 
 // ************************************************************************* //
