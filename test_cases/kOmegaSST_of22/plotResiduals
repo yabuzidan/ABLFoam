@@ -1,0 +1,24 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+# Plot residuals
+foamLog log.$(getApplication) > /dev/null 2>&1
+
+gnuplot << EOF
+    set terminal jpeg
+    set output "residuals.jpg"
+    
+    set logscale y
+    plot './logs/p_0' with lines, \
+        './logs/Ux_0' with lines, \
+        './logs/Uz_0' with lines, \
+        './logs/k_0' with lines, \
+        './logs/omega_0' with lines
+EOF
+
+
+# # Plot residuals
+# foamLog log.simpleFoam; gnuplot -e "set terminal jpeg; set output 'residuals.jpg'; set logscale y; plot './logs/p_0' with lines,'./logs/Ux_0' with lines,'./logs/Uz_0' with lines,'./logs/k_0' with lines,'./logs/omega_0' with lines"

@@ -1,0 +1,116 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v1912                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      setExprFieldsDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../0/include/ABLConditions"
+
+expressions
+(
+    U
+    {
+        field       U;
+        dimensions  [0 1 -1 0 0 0 0];
+
+        constants
+        {
+            z0 $z0;
+            kappa $kappa;
+            ustar $ustar;
+        }
+
+        expression
+        #{
+            vector($[constants.ustar]/$[constants.kappa]*log((pos().z()+$[constants.z0])/$[constants.z0]), 0, 0)
+        #};
+    }
+
+    k
+    {
+        field       k;
+        dimensions  [0 2 -2 0 0 0 0];
+
+        constants
+        {
+            z0 $z0;
+
+            A $A;
+            B $B;
+            C $C;
+            D $D;
+            E $E;
+        }
+
+        expression
+        #{
+            // "$A*log(($Z + $z0)/$z0) + $B*sqr(($zMax + $z0)/$z0) + $C*(($zMax + $z0)/$z0)+ $D +$E*log($zMax + $z0)"
+            $[constants.A]*log((pos().z()+$[constants.z0])/$[constants.z0])
+          + $[constants.B]*sqr((pos().z()+$[constants.z0])/$[constants.z0])
+          + $[constants.C]*((pos().z()+$[constants.z0])/$[constants.z0])
+          + $[constants.D] 
+          + $[constants.E]*log(pos().z()+$[constants.z0])
+        #};
+    }
+
+    omega
+    {
+        field       omega;
+        dimensions  [0 0 -1 0 0 0 0];
+
+        constants
+        {
+            z0 $z0;
+            kappa $kappa;
+            ustar $ustar;
+
+            A $A;
+            B $B;
+            C $C;
+            D $D;
+            E $E;
+        }
+
+        expression
+        #{
+            ( $[constants.A]*log((pos().z()+$[constants.z0])/$[constants.z0])
+            + $[constants.B]*sqr((pos().z()+$[constants.z0])/$[constants.z0])
+            + $[constants.C]*((pos().z()+$[constants.z0])/$[constants.z0])
+            + $[constants.D] 
+            + $[constants.E]*log(pos().z()+$[constants.z0]))
+            / $[constants.ustar]
+            /($[constants.kappa]*(pos().z()+$[constants.z0]))
+        #};
+    }
+
+    nut
+    {
+        field       nut;
+        dimensions  [0 2 -1 0 0 0 0];
+
+        constants
+        {
+            z0 $z0;
+            kappa $kappa;
+            ustar $ustar;
+        }
+
+        expression
+        #{
+            $[constants.ustar]*$[constants.kappa]*(pos().z()+$[constants.z0])
+        #};
+    }
+);
+
+
+// ************************************************************************* //
