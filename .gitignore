@@ -70,6 +70,7 @@ Darwin*
 !constant/turbulenceProperties
 !system/
 !.gitignore
+!0.orig/
 
 # Needed when C++ code is built using the OpenFOAM library, since it does not
 # use a "normal" build tool (make, cmake, ..).
