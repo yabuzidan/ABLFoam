@@ -10,9 +10,9 @@ runApplication blockMesh
 # Restore 0 Directory
 runApplication restore0Dir
 
-# # Initialise fields
-# runApplication setExprFields
-# runApplication setExprBoundaryFields
+# Initialise fields
+runApplication setExprFields
+runApplication setExprBoundaryFields
 
 # Decomponse mesh
 runApplication decomposePar
