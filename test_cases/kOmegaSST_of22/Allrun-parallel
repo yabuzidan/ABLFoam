@@ -10,7 +10,7 @@ runApplication blockMesh
 # Restore 0 Directory
 runApplication restore0Dir
 
-# Initialise fields
+# # Initialise fields
 # runApplication setExprFields
 # runApplication setExprBoundaryFields
 

@@ -28,7 +28,7 @@ FoamFile
 
     // Cell divisions in each direction
     xCells  1000; //1000
-    yCells  2;   //10
+    yCells  10;   //10
 
     zCells  94; // case 1
     // zCells  141; // case 2
