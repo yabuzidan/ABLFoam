@@ -28,7 +28,7 @@ boundaryField
     {
         type            VelocityABL;
         #include        "include/ABLConditions"
-        value            $internalField;
+        value           $internalField;
     }
 
     outlet 
@@ -38,10 +38,9 @@ boundaryField
         value           $internalField;
     }
 
-    ground      
+    ground
     {
-        type            fixedValue;
-        value           uniform (0 0 0);
+        type            noSlip;
     }
 
     #include "include/sideAndTopPatches"

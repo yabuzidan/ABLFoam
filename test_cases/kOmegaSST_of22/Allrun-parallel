@@ -7,10 +7,12 @@ cd ${0%/*} || exit 1    # Run from this directory
 # Create mesh
 runApplication blockMesh
 
-# Initialise fields
+# Restore 0 Directory
 runApplication restore0Dir
-runApplication setExprFields
-runApplication setExprBoundaryFields
+
+# Initialise fields
+# runApplication setExprFields
+# runApplication setExprBoundaryFields
 
 # Decomponse mesh
 runApplication decomposePar
@@ -27,4 +29,4 @@ rm -rf dynamicCode  > /dev/null 2>&1
 
 # Run Post
 python3 post.py  # > /dev/null 2>&1
-python3 post1.py  # > /dev/null 2>&1
+# python3 post1.py  # > /dev/null 2>&1

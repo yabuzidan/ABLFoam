@@ -13,12 +13,12 @@ top
 
 sides_1
 {
-    type empty;
+    type zeroGradient;
 }
 
 sides_2
 {
-    type empty;
+    type zeroGradient;
 }
 
 "proc.*"

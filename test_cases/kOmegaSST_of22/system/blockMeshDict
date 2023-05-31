@@ -17,23 +17,23 @@ FoamFile
     // Domain dimensions
     xMin   -2000;
     xMax   0;
-    yMin   -5;
-    yMax   5;
+    yMin   -10;
+    yMax   10;
     zMin   0;
 
-    // zMax   300; // case 1
+    zMax   300; // case 1
     // zMax   450; // case 2
     // zMax   600; // case 3
-    zMax   800; // case 4
+    // zMax   800; // case 4
 
     // Cell divisions in each direction
-    xCells  100; //1000
-    yCells  1;   //10
+    xCells  1000; //1000
+    yCells  2;   //10
 
-    // zCells  94; // case 1
+    zCells  94; // case 1
     // zCells  141; // case 2
     // zCells  189; // case 3
-    zCells  252; // case 4
+    // zCells  252; // case 4
 
 convertToMeters 1;
 
@@ -78,7 +78,7 @@ boundary
     }
     sides_1
     {
-        type empty;
+        type patch;
         faces
         (
             (0 4 5 1)
@@ -86,7 +86,7 @@ boundary
     }
     sides_2
     {
-        type empty;
+        type patch;
         faces
         (
             (3 2 6 7)

@@ -23,15 +23,15 @@ startTime       0;
 
 stopAt          endTime;
 
-endTime         10000;
+endTime         3000;
 
 deltaT          1;
 
 writeControl    timeStep;
 
-writeInterval   10000;
+writeInterval   1000;
 
-purgeWrite      1;
+purgeWrite      0;
 
 writeFormat     ascii;
 
@@ -56,12 +56,6 @@ functions
 {
   #include  "sampleLines"
 
-  residuals
-  {
-      type            solverInfo;
-      libs            (utilityFunctionObjects);
-      fields          (".*");
-  }
 }
 
 // ************************************************************************* //

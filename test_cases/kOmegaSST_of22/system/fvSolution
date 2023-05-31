@@ -16,65 +16,34 @@ FoamFile
 
 solvers
 {
-    // p
-    // {
-    //     solver          PCG;
-    //     preconditioner  DIC;
-    //     tolerance       1e-09;
-    //     relTol          0.1;
-    //     maxIter         100;
-    // }
-
-    // "(U|k|epsilon|omega)"
-    // {
-    //     solver          PBiCG;
-    //     preconditioner  DILU;
-    //     tolerance       1e-09;
-    //     relTol          0.1;
-    // }
-
-    p                                  // linear equation system solver for p
+    p
     {
-        solver          GAMG;           // very efficient multigrid solver
-        tolerance       1e-09;          // solver finishes if either absolute
-        relTol          0.001;          // tolerance is reached or the relative
-                                        // tolerance here
-        minIter         3;              // a minimum number of iterations
-        maxIter         100;            // limitation of iterions number
-        smoother        DIC;            // setting for GAMG
-        nPreSweeps      1;              // 1 for p, set to 0 for all other!
-        nPostSweeps     2;              // 2 is fine
-        nFinestSweeps   2;              // 2 is fine
-        scaleCorrection true;           // true is fine
-        directSolveCoarsestLevel false; // false is fine
-        cacheAgglomeration on;          // on is fine; set to off, if dynamic
-                                        // mesh refinement is used!
-        nCellsInCoarsestLevel 500;      // 500 is fine,
-                                        // otherwise sqrt(number of cells)
-        agglomerator    faceAreaPair;   // faceAreaPair is fine
-        mergeLevels     1;              // 1 is fine
+        solver           GAMG;
+        smoother         GaussSeidel;
+        tolerance        1e-6;
+        relTol           0.1;
     }
 
-    "(U|k|epsilon|omega|nut)"
+    "(U|k|epsilon|omega)"
     {
-        solver          smoothSolver;   // solver type
-        smoother        GaussSeidel;    // smoother type
-        tolerance       1e-09;          // solver finishes if either absolute
-        relTol          0.001;           // tolerance is reached or the relative
-                                        // tolerance here
-        nSweeps         1;              // setting for smoothSolver
-        maxIter         100;            // limitation of iterations number
+        solver           smoothSolver;
+        smoother         GaussSeidel;
+        tolerance        1e-7;
+        relTol           0.1;
     }
 }
 
 SIMPLE
 {
     nNonOrthogonalCorrectors 0;
+    consistent               true;
+    pRefCell                 0;
+    pRefValue                0;
 
     residualControl
     {
         p               1e-4;
-        "(U|k|epsilon|omega|nut)" 1e-5;
+        "(U|k|epsilon|omega|nut)" 1e-4;
     }
 }
 

@@ -43,18 +43,6 @@ boundaryField
 
     #include "include/sideAndTopPatches"
 
-    top
-    {
-        type fixedValue;
-
-        #include        "$FOAM_CASE/system/blockMeshDict"
-        #include        "include/ABLConditions"
-        
-        topK #calc      "$A*log(($zMax + $z0)/$z0) + $B*sqr(($zMax + $z0)/$z0) + $C*(($zMax + $z0)/$z0)+ $D +$E*log($zMax + $z0)";
-       
-        value uniform $topK;
-    }
-
 }
 
 
